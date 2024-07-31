@@ -1,0 +1,134 @@
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <!--begin::Content container-->
+    <div id="kt_app_content_container" class="app-container container-xxl">
+
+        {% for project in projects %}
+            <div class="card mb-5 mb-xl-8">
+                <!--begin::Header-->
+                <div class="card-header border-0 pt-5">
+                    <h3 class="card-title align-items-start flex-column">
+                        <span class="card-label fw-bold fs-3 mb-1">Project {{ loop.index }} - {{ project['project'].name }}</span>
+                    </h3>
+                    <div class="card-toolbar">
+                        <!--begin::Menu-->
+                        <div class="card-toolbar">
+                            <a href="{{ url_for('projects.assign_consultants', project_id=project['project'].id ) }}"
+                               class="btn btn-sm btn-light-primary">
+                                <i class="ki-duotone ki-plus fs-2"></i>Assign New Consultant</a>
+                        </div>
+                        <!--end::Menu 2-->
+                        <!--end::Menu-->
+                    </div>
+                </div>
+                <!--end::Header-->
+                <!--begin::Body-->
+                <div class="card-body py-3">
+                    <!--begin::Table container-->
+                    <div class="table-responsive">
+                        <!--begin::Table-->
+                        <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
+                            <!--begin::Table head-->
+                            <thead>
+                            <tr class="fw-bold text-muted">
+                                <th class="min-w-50px">Consultant ID</th>
+                                <th class="min-w-100px">Name</th>
+                                <th class="min-w-150px">Hourly Rate</th>
+                                <th class="min-w-100px text-end">Actions</th>
+                            </tr>
+                            </thead>
+                            <!--end::Table head-->
+                            <!--begin::Table body-->
+                            <tbody>
+                            {% for consultant in project['consultants'] %}
+                                {% if id==consultant['project_consultant'].id %}
+                                    <form action="{{ url_for('projects.projects_consultants', id=id) }}" method="post">
+                                    <input type="hidden" name="project_consultant_id" value="{{ consultant['project_consultant'].id }}">
+                                        <tr>
+                                            <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ consultant['consultant'].id }}</td>
+                                            <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ consultant['consultant'].name }}</td>
+                                            <td><input class="form-control w-75" id="hourly_rate" name="hourly_rate"
+                                                       placeholder="Enter Hourly Rate"
+                                                       {% if consultant['project_consultant'].client_hourly_rate %}value="{{ consultant['project_consultant'].client_hourly_rate }}"{% endif %}>
+                                            </td>
+                                            <td class="text-end">
+                                                <button type="submit"
+                                                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                         fill="currentColor" class="bi bi-check-circle"
+                                                         viewBox="0 0 16 16">
+                                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                                    </svg>
+
+                                                </button>
+                                                <a href="{{ url_for('projects.projects_consultants') }}"
+                                                   class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                         fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                                    </svg>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </form>
+                                {% else %}
+                                    <tr>
+                                        <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ consultant['consultant'].id }}</td>
+                                        <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ consultant['consultant'].name }}</td>
+                                        <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ consultant['project_consultant'].client_hourly_rate }}</td>
+                                        <td class="text-end">
+                                            <a href="{{ url_for('projects.projects_consultants', id=consultant['project_consultant'].id ) }}"
+                                               class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                                                <i class="ki-duotone ki-pencil fs-2">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                </i>
+                                            </a>
+
+                                            <a href="{{ url_for('projects.delete_project_consultant', id=consultant['project_consultant'].id ) }}"
+                                               class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link">
+                                                <i class="ki-duotone ki-trash fs-2">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                    <span class="path3"></span>
+                                                    <span class="path4"></span>
+                                                    <span class="path5"></span>
+                                                </i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                            <!--end::Table body-->
+                        </table>
+                        <!--end::Table-->
+                    </div>
+                    <!--end::Table container-->
+                </div>
+                <!--begin::Body-->
+            </div>
+        {% else %}
+            <div>
+            <h1>No Projects to Show. Please add one first.</h1>
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+<script>
+    window.addEventListener('beforeunload', function () {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    });
+
+    // Function to restore scroll position after the page reloads
+    window.addEventListener('load', function () {
+        const scrollPosition = localStorage.getItem('scrollPosition');
+        if (scrollPosition) {
+            window.scrollTo(0, parseInt(scrollPosition, 10));
+            localStorage.removeItem('scrollPosition'); // Remove it after restoring
+        }
+    });
+</script>

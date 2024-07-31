@@ -1,0 +1,140 @@
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <!--begin::Content container-->
+<div id="kt_app_content_container" class="app-container container-xxl">
+
+<div class="card mb-5 mb-xl-8">
+    <!--begin::Header-->
+    <div class="card-header border-0 pt-5">
+        <h3 class="card-title align-items-start flex-column">
+            <span class="card-label fw-bold fs-3 mb-1">Client Dashboard</span>
+        </h3>
+        <div class="card-toolbar">
+            <!--begin::Menu-->
+            <div class="card-toolbar">
+                <a href="{{ url_for('clients.add_client') }}" class="btn btn-sm btn-light-primary">
+                <i class="ki-duotone ki-plus fs-2"></i>New Client</a>
+            </div>
+            <!--end::Menu 2-->
+            <!--end::Menu-->
+        </div>
+    </div>
+    <!--end::Header-->
+    <!--begin::Body-->
+    <div class="card-body py-3">
+        <!--begin::Table container-->
+        <div class="table-responsive">
+            <!--begin::Table-->
+            <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
+                <!--begin::Table head-->
+                <thead>
+                    <tr class="fw-bold text-muted">
+                        <th class="min-w-100px">Client ID</th>
+                        <th class="min-w-150px">Name</th>
+                        <th class="min-w-200px">Address</th>
+                        <!-- <th class="min-w-150px">Value Type</th> -->
+                        <th class="min-w-150px">Country</th>
+                        <th class="min-w-150px">Currency</th>
+                        <th class="min-w-100px text-end">Actions</th>
+                    </tr>
+                </thead>
+                <!--end::Table head-->
+                <!--begin::Table body-->
+                <tbody>
+                    {% for client in clients %}
+                        {% if id==client.id %}
+                        <tr>
+                            <form action="" method="post">
+                                <th class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{client.id}}</th>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6"><input class="form-control form-control-solid ms-n3" type="text" id="name" name="name" value="{{client.name}}" required></td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6"><input class="form-control form-control-solid ms-n3" type="text" id="address" name="address" value="{{client.address}}" required></td>
+                                <!-- <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{client.ValueType}}</td> -->
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6"><input class="form-control form-control-solid w-50 ms-n3" type="text" id="country" name="country" value="{{client.country}}" required></td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6"><input class="form-control form-control-solid w-50 ms-n3" type="text" id="currency" name="currency" value="{{client.currency}}" required></td>
+                                <td class="text-end">
+                                    <button type="submit" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                        </svg>
+                                    </button>
+                                        <a href="{{ url_for('clients.manage_clients') }}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link" data-category-name="{{ client.category_name }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                            </svg>
+                                        </a>
+
+                                    <a href="{{ url_for('clients.delete_client', id=client.id )}}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link" data-category-name="{{ client.category_name }}">
+                                        <i class="ki-duotone ki-trash fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                            <span class="path5"></span>
+                                        </i>
+                                    </a>
+                                </td>
+                            </form>
+                        </tr>
+                        {% else %}
+                            <tr>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{client.id}}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{client.name}}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{client.address}}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{client.country}}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{client.currency}}</td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('time_entries.view_time_entries', filter_clients=client.id )}}" class="btn btn-bg-light btn-active-color-primary btn-sm me-1 px-5">
+                                        <span>View Time Entries</span>
+                                    </a>
+
+                                    <a href="{{ url_for('clients.manage_clients', id=client.id )}}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                                        <i class="ki-duotone ki-pencil fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                        </i>
+                                    </a>
+
+                                    <a href="{{ url_for('clients.delete_client', id=client.id )}}" class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link" data-category-name="{{ client.category_name }}">
+                                        <i class="ki-duotone ki-trash fs-2">
+                                            <span class="path1"></span>
+                                            <span class="path2"></span>
+                                            <span class="path3"></span>
+                                            <span class="path4"></span>
+                                            <span class="path5"></span>
+                                        </i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% endfor %}
+                </tbody>
+                <!--end::Table body-->
+            </table>
+            <!--end::Table-->
+        </div>
+        <!--end::Table container-->
+    </div>
+    <!--begin::Body-->
+</div>
+
+</div>
+</div>
+
+<script>
+    // Delete Confirmation Function:
+    // document.querySelectorAll(".delete-link").forEach(function(link) {
+    //     link.addEventListener("click", function(event) {
+    //         event.preventDefault();
+    //         var categoryName = this.getAttribute("data-category-name");
+    //         var confirmDelete = confirm("Are you sure you want to delete the category '" + categoryName + "'?");
+
+    //         if (confirmDelete) {
+    //             // If confirmed, navigate to the delete URL
+    //             window.location.href = this.getAttribute("href");
+    //         } else {
+    //             // If not confirmed, do nothing
+    //         }
+    //     });
+    // });
+</script>

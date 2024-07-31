@@ -1,0 +1,260 @@
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <!--begin::Content container-->
+    <div id="kt_app_content_container" class="app-container container-xxl">
+
+        <h2 class="card-title align-items-start flex-column mb-5">
+            <span class="card-label fw-bold fs-1">What have you done today?</span>
+        </h2>
+        <h2 class="card-title align-items-start flex-column mb-5">
+            <span class="card-label fw-medium fs-3">{{ tracking_day }} - {{ tracking_date.date() }}</span>
+        </h2>
+        <ul class="pagination my-3 mb-7">
+            <li class="page-item previous"><a href="{{ url_for('time_tracking.track_time', date=five_day_array[1]) }}"
+                                              class="page-link"><i class="previous"></i></a></li>
+            <li class="page-item "><a href="{{ url_for('time_tracking.track_time', date=five_day_array[0]) }}"
+                                      class="page-link">{{ five_day_array[0].day }}</a></li>
+            <li class="page-item "><a href="{{ url_for('time_tracking.track_time', date=five_day_array[1]) }}"
+                                      class="page-link">{{ five_day_array[1].day }}</a></li>
+            <li class="page-item active"><a href="{{ url_for('time_tracking.track_time', date=five_day_array[2]) }}"
+                                            class="page-link">{{ five_day_array[2].day }}</a></li>
+            <li class="page-item "><a href="{{ url_for('time_tracking.track_time', date=five_day_array[3]) }}"
+                                      class="page-link">{{ five_day_array[3].day }}</a></li>
+            <li class="page-item "><a href="{{ url_for('time_tracking.track_time', date=five_day_array[4]) }}"
+                                      class="page-link">{{ five_day_array[4].day }}</a></li>
+            <li class="page-item next"><a href="{{ url_for('time_tracking.track_time', date=five_day_array[3]) }}"
+                                          class="page-link"><i class="next"></i></a></li>
+            <li class="page-item next {% if today == True %}disabled{% endif %}">
+                <a class="page-link page-text" href="{{ url_for('time_tracking.track_time', date='today') }}">Go to
+                    Today</a>
+            </li>
+        </ul>
+        {% for client in clients %}
+            <div class="card mb-5 mb-xl-8">
+                <!--begin::Header-->
+                <div class="card-header border-0 pt-5">
+                    <h3 class="card-title align-items-start flex-column">
+                        <span class="card-label fw-bold fs-3 mb-1">Client {{ loop.index }} - {{ client.name }}</span>
+                    </h3>
+                    <div class="card-toolbar">
+                        <!--begin::Menu-->
+                        {#                    <div class="card-toolbar">#}
+                        {#                        <a href="{{ url_for('clients.add_client') }}" class="btn btn-sm btn-light-primary">#}
+                        {#                            <i class="ki-duotone ki-plus fs-2"></i>New Client</a>#}
+                        {#                    </div>#}
+                        <!--end::Menu 2-->
+                        <!--end::Menu-->
+                    </div>
+                </div>
+                <!--end::Header-->
+                <!--begin::Body-->
+                <div class="card-body py-3">
+                    <!--begin::Table container-->
+                    <div class="table-responsive">
+                        <!--begin::Table-->
+                        <table class="table table-row-bordered table-row-gray-100 align-middle gs-0 gy-3">
+                            <!--begin::Table head-->
+                            <thead>
+                            <tr class="fw-bold text-muted">
+                                <th class="min-w-50px">Project ID</th>
+                                <th class="min-w-100px">Name</th>
+                                <th class="min-w-150px">Notes</th>
+                                <th class="min-w-150px">Time Spent (Hours & Mins)</th>
+                                <th class="min-w-50px">Billable</th>
+                                <th class="min-w-100px text-end">Actions</th>
+                            </tr>
+                            </thead>
+                            <!--end::Table head-->
+                            <!--begin::Table body-->
+                            <tbody>
+                            {% for project in time_entries %}
+                                {% if project['project'].customer_id==client.id %}
+                                    {% for time_entry in project['time_entry'] %}
+                                        <tr>
+                                            <form action="{{ url_for('time_tracking.add_time_entry') }}" method="post">
+                                                <input type="hidden" value="{{ time_entry.id }}"
+                                                       name="time_entry_id">
+                                                <input type="hidden" name="tracking_date" value="{{ tracking_date }}">
+                                                <th class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['project'].id }}</th>
+                                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['project'].name }}</td>
+                                                {% if time_entry.tracked == False %}
+                                                    <td class="text-dark fw-bold text-hover-primary mb-1 fs-6"><input
+                                                            class="form-control form-control-solid ms-n3" type="text"
+                                                            id="description"
+                                                            name="description" required
+                                                            placeholder="What have you done today?"
+                                                            {% if time_entry.description %}value="{{ time_entry.description }}"{% endif %}>
+                                                    </td>
+                                                {% else %}
+                                                    <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ time_entry.description }}</td>
+                                                {% endif %}
+
+                                                {% if time_entry.tracked == False %}
+                                                    <td class="text-dark fw-bold text-hover-primary mb-1 fs-6 d-flex">
+                                                        <input
+                                                                class="form-control form-control-solid w-60px px-3 ms-n3"
+                                                                type="number"
+                                                                id="hours" name="hours" value=
+                                                                        {% if time_entry.hours %}{{ time_entry.hours }}{% else %}"00"{% endif %}
+                                                                max="24" min="0" required>
+                                                        <p class="mt-3"> : </p>
+                                                        <input
+                                                                class="form-control form-control-solid w-60px px-3 ms-1"
+                                                                type="number"
+                                                                id="minutes" name="minutes" value=
+                                                                        {% if time_entry.minutes %}{{ time_entry.minutes }}{% else %}"00"{% endif %}
+                                                                max="60" min="0" required>
+                                                    </td>
+                                                {% else %}
+                                                    <td class="text-dark fw-bold text-hover-primary pt-7 mb-1 fs-6 d-flex">
+                                                        {% if time_entry.hours < 10 %}
+                                                            <p>0{{ time_entry.hours }}</p>
+                                                        {% else %}
+                                                            <p>{{ time_entry.hours }}</p>
+                                                        {% endif %}
+                                                        <p>:</p>
+                                                        {% if time_entry.minutes < 10 %}
+                                                            <p>0{{ time_entry.minutes }}</p>
+                                                        {% else %}
+                                                            <p>{{ time_entry.minutes }}</p>
+                                                        {% endif %}
+                                                    </td>
+                                                {% endif %}
+
+                                                <td>
+                                                    {% if time_entry.tracked == False %}
+                                                        <div class="text-dark fw-bold text-hover-primary mb-1 fs-6">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                       value="billable"
+                                                                        {% if time_entry.billable == True %}
+                                                                       checked
+                                                                        {% endif %}
+                                                                       id="billable" name="billable"/>
+                                                            </div>
+                                                        </div>
+                                                    {% else %}
+                                                        {% if time_entry.billable == True %}
+                                                            <div>
+                                                                <span class="badge py-2 px-4 fs-7 badge-light-success">Billable</span>
+                                                            </div>
+                                                        {% else %}
+                                                            <div>
+                                                                <span class="badge py-2 px-4 fs-7 badge-light-danger">Not Billable</span>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-end">
+                                                    {% if time_entry.tracked == False %}
+                                                        <button type="submit"
+                                                                class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20"
+                                                                 height="20"
+                                                                 fill="currentColor" class="bi bi-check-circle"
+                                                                 viewBox="0 0 16 16">
+                                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                                <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                                            </svg>
+                                                        </button>
+                                                        <a href="{{ url_for('time_tracking.delete_time_entry', id=time_entry.id) }}"
+                                                           class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link me-1">
+                                                            <i class="ki-duotone ki-trash fs-2">
+                                                                <span class="path1"></span>
+                                                                <span class="path2"></span>
+                                                                <span class="path3"></span>
+                                                                <span class="path4"></span>
+                                                                <span class="path5"></span>
+                                                            </i>
+                                                        </a>
+                                                        {#                                                        <a href="#"#}
+                                                        {#                                                           class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link"#}
+                                                        {#                                                        >#}
+                                                        {#                                                            <svg xmlns="http://www.w3.org/2000/svg" width="20"#}
+                                                        {#                                                                 height="20"#}
+                                                        {#                                                                 fill="currentColor" class="bi bi-x-circle"#}
+                                                        {#                                                                 viewBox="0 0 16 16">#}
+                                                        {#                                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>#}
+                                                        {#                                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>#}
+                                                        {#                                                            </svg>#}
+                                                        {#                                                        </a>#}
+                                                    {% else %}
+                                                        <input type="hidden" name="edit"
+                                                               value="{{ time_entry.id }}" id="edit">
+                                                        <button type="submit"
+                                                                class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                                                            <i class="ki-duotone ki-pencil fs-2">
+                                                                <span class="path1"></span>
+                                                                <span class="path2"></span>
+                                                            </i>
+                                                        </button>
+                                                    {% endif %}
+                                                </td>
+                                            </form>
+                                        </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="4">
+                                            <form action="{{ url_for('time_tracking.create_time_entry') }}"
+                                                  method="post">
+                                                <input type="hidden" name="project_id"
+                                                       value="{{ project['project'].id }}">
+                                                <input type="hidden" name="tracking_date" value="{{ tracking_date }}">
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-light-primary">
+                                                    <i class="ki-duotone ki-plus fs-2"></i>Add Another Time Entry for
+                                                    '{{ project['project'].name }}'
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            </tbody>
+                            <!--end::Table body-->
+                        </table>
+                        <!--end::Table-->
+                    </div>
+                    <!--end::Table container-->
+                </div>
+                <!--begin::Body-->
+            </div>
+
+        {% else %}
+            <div>
+                <h1 class="text-center mt-20">Nothing to show here. No Project Assigned.</h1>
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+<script>
+    window.addEventListener('beforeunload', function () {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    });
+
+    // Function to restore scroll position after the page reloads
+    window.addEventListener('load', function () {
+        const scrollPosition = localStorage.getItem('scrollPosition');
+        if (scrollPosition) {
+            window.scrollTo(0, parseInt(scrollPosition, 10));
+            localStorage.removeItem('scrollPosition'); // Remove it after restoring
+        }
+    });
+
+    // Delete Confirmation Function:
+    // document.querySelectorAll(".delete-link").forEach(function(link) {
+    //     link.addEventListener("click", function(event) {
+    //         event.preventDefault();
+    //         var categoryName = this.getAttribute("data-category-name");
+    //         var confirmDelete = confirm("Are you sure you want to delete the category '" + categoryName + "'?");
+
+    //         if (confirmDelete) {
+    //             // If confirmed, navigate to the delete URL
+    //             window.location.href = this.getAttribute("href");
+    //         } else {
+    //             // If not confirmed, do nothing
+    //         }
+    //     });
+    // });
+</script>

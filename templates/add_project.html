@@ -1,0 +1,59 @@
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-xxl">
+
+        <div class="card mb-5 mb-xl-8">
+
+            <div class="card-header border-0 pt-5">
+                <h3 class="card-title align-items-start flex-column">
+                    <span class="card-label fw-bold fs-3 mb-1">Add a Project</span>
+                </h3>
+            </div>
+
+            <div class="card-body py-3">
+
+                <form action="{{ url_for('projects.add_project') }}" method="post">
+                    <label for="name" class="form-label">Project Name</label>
+                    <input type="text" id="name" name="name" class="form-control form-control-solid"
+                           placeholder="Enter Name" value="{% if project %}{{ project.name }}{% endif %}" required/>
+
+                    <label for="client" class="form-label mt-4">Client</label>
+                    <select id="client" name="client" class="form-select form-select-solid" required>
+                        {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="description" class="form-label mt-4">Project Description</label>
+                    <textarea id="description" name="description" class="form-control form-control-solid"
+                              placeholder="Describe the Project..." rows="5" required>{% if project %}
+                        {{ project.description }}{% endif %}</textarea>
+
+
+                    <label for="start_date" class="form-label mt-4">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control form-control-solid"
+                           placeholder="Select Start Date" value="{% if project %}{{ project.start_date }}{% endif %}"
+                           required/>
+
+                    <label for="end_date" class="form-label mt-4">End Date</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control form-control-solid"
+                           placeholder="Select End Date" value="{% if project %}{{ project.end_date }}{% endif %}"
+                           required/>
+
+
+                    {% if errors %}
+                        <ul>
+                            {% for error in errors %}
+                                <li class="form-label mt-4">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <button class="btn btn-primary my-5 me-2" type="submit">Add</button>
+                    <a href="{{ url_for('projects.manage_projects') }}" class="btn btn-secondary my-5">Cancel</a>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

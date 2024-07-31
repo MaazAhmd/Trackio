@@ -1,0 +1,42 @@
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-xxl">
+
+        <div class="card mb-5 mb-xl-8">
+
+            <div class="card-header border-0 pt-5">
+                <h3 class="card-title align-items-start flex-column">
+                    <span class="card-label fw-bold fs-3 mb-1">Assign a Consultant</span>
+                </h3>
+            </div>
+
+            <div class="card-body py-3">
+
+                <form action="{{ url_for('projects.assign_consultants', project_id=project.id) }}" method="post">
+                    <label for="consultant" class="form-label mt-4">Select Consultant</label>
+                    <select id="consultant" name="consultant" class="form-select form-select-solid" required>
+                        {% for consultant in consultants %}
+                            <option value="{{ consultant.id }}">{{ consultant.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="hourly_rate" class="form-label">Hourly Rate</label>
+                    <input type="number" id="hourly_rate" name="hourly_rate" class="form-control form-control-solid"
+                           placeholder="Enter Hourly Rate" required/>
+
+                    {% if errors %}
+                        <ul>
+                            {% for error in errors %}
+                                <li class="form-label mt-4">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <button class="btn btn-primary my-5 me-2" type="submit">Add</button>
+                    <a href="{{ url_for('projects.projects_consultants') }}" class="btn btn-secondary my-5">Cancel</a>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

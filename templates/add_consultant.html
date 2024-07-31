@@ -1,0 +1,45 @@
+<div id="kt_app_content" class="app-content flex-column-fluid">
+    <div id="kt_app_content_container" class="app-container container-xxl">
+
+        <div class="card mb-5 mb-xl-8">
+
+            <div class="card-header border-0 pt-5">
+                <h3 class="card-title align-items-start flex-column">
+                    <span class="card-label fw-bold fs-3 mb-1">Add a Consultant</span>
+                </h3>
+            </div>
+
+            <div class="card-body py-3">
+
+                <form action="{{ url_for('consultants.add_consultant') }}" method="post">
+                    <label for="name" class="form-label">Consultant Name</label>
+                    <input type="text" id="name" name="name" class="form-control form-control-solid"
+                           placeholder="Enter Name" value="{% if consultant %}{{ consultant.name }}{% endif %}" required/>
+
+                    <label for="address" class="form-label mt-4">Address</label>
+                    <input type="text" id="address" name="address" class="form-control form-control-solid"
+                           placeholder="Enter address" value="{% if consultant %}{{ consultant.address }}{% endif %}"
+                           required/>
+
+                    <label for="country" class="form-label mt-4">Country</label>
+                    <input type="text" id="country" name="country" class="form-control form-control-solid"
+                           placeholder="Enter country" value="{% if consultant %}{{ consultant.country }}{% endif %}"
+                           required/>
+
+                    {% if errors %}
+                        <ul>
+                            {% for error in errors %}
+                                <li class="form-label mt-4">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <button class="btn btn-primary my-5 me-2" type="submit">Add</button>
+                    <a href="{{ url_for('consultants.manage_consultants') }}" class="btn btn-secondary my-5">Cancel</a>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

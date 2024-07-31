@@ -1,0 +1,39 @@
+<!--begin::App-->
+<div class="d-flex flex-column flex-root app-root" id="kt_app_root">
+    <!--begin::Page-->
+    <div class="app-page  flex-column flex-column-fluid " id="kt_app_page">
+        {% include 'layout/partials/_header.html' %}
+        <!--begin::Wrapper-->
+        <div class="app-wrapper  flex-column flex-row-fluid " id="kt_app_wrapper">
+            {% include 'layout/partials/_sidebar.html' %}
+            <!--begin::Main-->
+            <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
+                <!--begin::Content wrapper-->
+                <div class="d-flex flex-column flex-column-fluid">
+                    <div class="container mt-4">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-custom alert-{{ category }} fade show mx-10" role="alert">
+                                        <div class="alert-text">{{ message }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+
+                    {% include page + '.html' %}
+
+                    <!-- Here was the layout/partials/_content -->
+                </div>
+                <!--end::Content wrapper-->
+                <!-- Here was include 'layout/partials/_footer.html' -->
+            </div>
+            <!--end:::Main-->
+        </div>
+        <!--end::Wrapper-->
+    </div>
+    <!--end::Page-->
+</div>
+<!--end::App-->
+<!-- include 'partials/_drawers.html' -->
