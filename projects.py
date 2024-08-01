@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user, logout_user
 
+from helping_functions import admin_required
 from models import Project, db, Client, ProjectConsultant, Consultant
 
 projects_blueprint = Blueprint('projects', __name__)
@@ -10,8 +11,22 @@ projects_blueprint = Blueprint('projects', __name__)
 @projects_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def manage_projects(id=None):
-    projects = Project.query.all()
-    projects = sorted(projects, key=lambda x: x.id)
+    if id is not None:
+        if not current_user.is_admin:
+            logout_user()
+            flash("You cannot access that page.")
+            return redirect(url_for('login'))
+
+    if current_user.is_admin:
+        projects = Project.query.all()
+        projects = sorted(projects, key=lambda x: x.id)
+    else:
+        consultants = ProjectConsultant.query.filter_by(consultant_id=current_user.consultant_id).all()
+        projects = []
+        for consultant in consultants:
+            projects.append(Project.query.get(consultant.project_id))
+        projects = sorted(projects, key=lambda x: x.id)
+
     clients = Client.query.all()
     project = Project.query.get(id)
     if id is not None:
@@ -41,6 +56,7 @@ def manage_projects(id=None):
 
 @projects_blueprint.route('/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_project():
     project = None
     clients = Client.query.all()
@@ -69,6 +85,7 @@ def add_project():
 
 @projects_blueprint.route('/delete/<int:id>', methods=['GET'])
 @login_required
+@admin_required
 def delete_project(id):
     project = Project.query.get(id)
     projects_consultants = ProjectConsultant.query.filter_by(project_id=id).all()
@@ -84,6 +101,7 @@ def delete_project(id):
 @projects_blueprint.route('/projects-consultants')
 @projects_blueprint.route('edit-project-consultant/<int:id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def projects_consultants(id=None):
     if request.method == 'POST':
         hourly_rate = request.form.get('hourly_rate')
@@ -112,6 +130,8 @@ def projects_consultants(id=None):
     return render_template('index.html', page='projects-consultants', projects=projects_with_consultants, clients=clients, id=id)
 
 @projects_blueprint.route('/assign-consultants/<int:project_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def assign_consultants(project_id):
     project = Project.query.get(project_id)
     if not project:
@@ -142,6 +162,8 @@ def assign_consultants(project_id):
 
 
 @projects_blueprint.route('delete-project-consultant/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
 def delete_project_consultant(id):
     project_consultant = ProjectConsultant.query.get(id)
     if not project_consultant:

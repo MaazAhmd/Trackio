@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required, current_user, login_user, logout_user
 
-from models import Client, db, Project
+from helping_functions import admin_required
+from models import Client, db, Project, ProjectConsultant
 
 clients_blueprint = Blueprint('clients', __name__)
 
@@ -10,7 +11,26 @@ clients_blueprint = Blueprint('clients', __name__)
 @clients_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def manage_clients(id=None):
-    clients = Client.query.all()
+    if id:
+        if not current_user.is_admin:
+            logout_user()
+            flash("You cannot access that page.")
+            return redirect(url_for('login'))
+
+    if current_user.is_admin:
+        projects = Project.query.all()
+        projects = sorted(projects, key=lambda x: x.id)
+        clients = Client.query.all()
+    else:
+        consultants = ProjectConsultant.query.filter_by(consultant_id=current_user.consultant_id).all()
+        projects = []
+        for consultant in consultants:
+            projects.append(Project.query.get(consultant.project_id))
+        projects = sorted(projects, key=lambda x: x.id)
+        clients = []
+        for project in projects:
+            clients.append(Client.query.get(project.customer_id))
+
     client = Client.query.get(id)
     if id is not None:
         if client is None:
@@ -41,6 +61,7 @@ def manage_clients(id=None):
 
 @clients_blueprint.route('/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_client():
     client = None
     if request.method == 'POST':
@@ -62,6 +83,7 @@ def add_client():
 
 @clients_blueprint.route('/clients/delete/<int:id>', methods=['GET'])
 @login_required
+@admin_required
 def delete_client(id):
     client = Client.query.get(id)
     projects = Project.query.all()

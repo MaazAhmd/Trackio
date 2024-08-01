@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
-from models import Consultant, db
+from helping_functions import admin_required
+from models import Consultant, db, User
 
 consultants_blueprint = Blueprint('consultants', __name__)
 
@@ -38,26 +39,44 @@ def manage_consultants(id=None):
 
 @consultants_blueprint.route('/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def add_consultant():
     consultant = None
+    new_user = None
     if request.method == 'POST':
+        username = request.form.get('username')
+        user = User.query.filter_by(username=username).first()
         consultant = Consultant()
         consultant.name = request.form.get('name')
         consultant.address = request.form.get('address')
         consultant.country = request.form.get('country')
 
-        if not consultant.address or not consultant.country or not consultant.name:
+        if user:
+            flash('User already exists with this Username', 'danger')
+            return render_template('index.html', page='add_consultant', consultant=consultant)
+
+        if not consultant.address or not consultant.country or not consultant.name or not username:
             flash('All fields are required', 'danger')
             return render_template('index.html', page='add_consultant', consultant=consultant)
 
-        db.session.add(consultant)
-        db.session.commit()
+        try:
+            db.session.add(consultant)
+            db.session.commit()
+
+            new_user = User(username=username, consultant_id=consultant.id)
+            db.session.add(new_user)
+            db.session.commit()
+        except Exception as e:
+            flash('Something went wrong.', 'danger')
+            db.session.rollback()
+
         return redirect(url_for('consultants.manage_consultants'))
     return render_template('index.html', page='add_consultant', consultant=consultant)
 
 
 @consultants_blueprint.route('/consultants/delete/<int:id>', methods=['GET'])
 @login_required
+@admin_required
 def delete_consultant(id):
     consultant = Consultant.query.get(id)
     db.session.delete(consultant)

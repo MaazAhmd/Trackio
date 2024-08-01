@@ -23,7 +23,9 @@ class ProjectConsultant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='CASCADE'), nullable=False)
     consultant_id = db.Column(db.Integer, db.ForeignKey('consultant.id', ondelete='CASCADE'), nullable=False)
+    hourly = db.Column(db.Boolean, default=False)
     client_hourly_rate = db.Column(db.Float)
+    price = db.Column(db.Float)
 
     project = db.relationship('Project', back_populates='consultants')
     consultant = db.relationship('Consultant', back_populates='projects')
@@ -38,8 +40,10 @@ class Consultant(db.Model):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False)
-    password = db.Column(db.Text, nullable=False)
+    password = db.Column(db.Text)
     consultant_id = db.Column(db.Integer, db.ForeignKey('consultant.id', ondelete='CASCADE'), nullable=True)
+    is_admin = db.Column(db.Boolean, default=False)
+    password_set = db.Column(db.Boolean, default=False)
 
 
 class TimeEntry(db.Model):
