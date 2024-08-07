@@ -122,24 +122,34 @@
 
                                                 <td>
                                                     {% if time_entry.tracked == False %}
-                                                        <div class="text-dark fw-bold text-hover-primary mb-1 fs-6">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       value="billable"
-                                                                        {% if time_entry.billable == True %}
-                                                                       checked
-                                                                        {% endif %}
-                                                                       id="billable" name="billable"/>
-                                                            </div>
-                                                        </div>
-                                                    {% else %}
-                                                        {% if time_entry.billable == True %}
-                                                            <div>
-                                                                <span class="badge py-2 px-4 fs-7 badge-light-success">Billable</span>
+                                                        {% if not project['project'].price %}
+                                                            <div class="text-dark fw-bold text-hover-primary mb-1 fs-6">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox"
+                                                                           value="billable"
+                                                                            {% if time_entry.billable == True %}
+                                                                           checked
+                                                                            {% endif %}
+                                                                           id="billable" name="billable"/>
+                                                                </div>
                                                             </div>
                                                         {% else %}
+                                                            <span class="text-dark fw-bold text-hover-primary mb-1 fs-6">N/A</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        {% if not project['project'].price %}
+                                                            {% if time_entry.billable == True %}
+                                                                <div>
+                                                                    <span class="badge py-2 px-4 fs-7 badge-light-success">Billable</span>
+                                                                </div>
+                                                            {% else %}
+                                                                <div>
+                                                                    <span class="badge py-2 px-4 fs-7 badge-light-danger">Not Billable</span>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% else %}
                                                             <div>
-                                                                <span class="badge py-2 px-4 fs-7 badge-light-danger">Not Billable</span>
+                                                                <span class="badge py-2 px-4 fs-7 badge-light-primary">Fixed Price</span>
                                                             </div>
                                                         {% endif %}
                                                     {% endif %}

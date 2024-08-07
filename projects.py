@@ -17,14 +17,26 @@ def manage_projects(id=None):
             flash("You cannot access that page.")
             return redirect(url_for('login'))
 
+    status = request.args.get('status')
     if current_user.is_admin:
-        projects = Project.query.all()
+        if not status or status == 'Active':
+            projects = Project.query.filter_by(active=True).all()
+        else:
+            projects = Project.query.filter_by(active=False).all()
+
         projects = sorted(projects, key=lambda x: x.id)
+
     else:
         consultants = ProjectConsultant.query.filter_by(consultant_id=current_user.consultant_id).all()
         projects = []
         for consultant in consultants:
-            projects.append(Project.query.get(consultant.project_id))
+            project = Project.query.get(consultant.project_id)
+            if not status or status == 'Active':
+                if project.active:
+                    projects.append(project)
+            else:
+                if not project.active:
+                    projects.append(project)
         projects = sorted(projects, key=lambda x: x.id)
 
     clients = Client.query.all()
@@ -44,6 +56,12 @@ def manage_projects(id=None):
                     flash('Please Enter Valid Details.', 'danger')
                     return render_template('index.html', page='view-projects', projects=projects, id=id,
                                            clients=clients)
+                if project.price:
+                    price = request.form.get('price')
+                    if not price:
+                        flash('Please Enter Valid Details.', 'danger')
+                        return render_template('index.html', page='view-projects', projects=projects, id=id, clients=clients, status=status)
+                    project.price = price
                 project.name = name
                 # project.start_date = start_date
                 project.end_date = end_date
@@ -51,7 +69,7 @@ def manage_projects(id=None):
                 db.session.commit()
                 return redirect(url_for('projects.manage_projects'))
 
-    return render_template('index.html', page='view-projects', projects=projects, id=id, clients=clients)
+    return render_template('index.html', page='view-projects', projects=projects, id=id, clients=clients, status=status)
 
 
 @projects_blueprint.route('/add', methods=['GET', 'POST'])
@@ -71,11 +89,26 @@ def add_project():
             flash('All fields are required', 'danger')
             return render_template('index.html', page='add_project', project=project, clients=clients)
 
+        hourly = request.form.get('hourly')
+        if not hourly:
+            project.price = request.form.get('price')
+            if not project.price:
+                flash('No Price input given.', 'danger')
+                return render_template('index.html', page='add_project', project=project, clients=clients)
+
         db.session.add(project)
         db.session.commit()
 
         # Making the user who added it to be the consultant of that project:
         project_consultant = ProjectConsultant(project_id=project.id, consultant_id=current_user.consultant_id)
+        if hourly:
+            project_consultant.hourly = True
+        else:
+            project_consultant.price = project.price
+
+        client = Client.query.get(project.customer_id)
+        project_consultant.currency = client.currency
+
         db.session.add(project_consultant)
         db.session.commit()
 
@@ -104,20 +137,33 @@ def delete_project(id):
 @admin_required
 def projects_consultants(id=None):
     if request.method == 'POST':
-        hourly_rate = request.form.get('hourly_rate')
-        if not hourly_rate:
-            flash('Hourly Rate is required', 'danger')
+        currency = request.form.get('currency')
+        price = request.form.get('price')
+        if not price or not currency:
+            flash('Price and Currency are required', 'danger')
             return redirect(url_for('projects.projects_consultants'))
         project_consultant_object = ProjectConsultant.query.get(id)
         if not project_consultant_object:
             flash('Something went wrong. No matching record found in the database.')
             return redirect(url_for('projects.projects_consultants'))
-        project_consultant_object.client_hourly_rate = hourly_rate
+        project_consultant_object.price = price
+        project_consultant_object.currency = currency
         db.session.add(project_consultant_object)
         db.session.commit()
         return redirect(url_for('projects.projects_consultants'))
 
-    projects = Project.query.all()
+    status = request.args.get('status')
+    if current_user.is_admin:
+        if not status or status == 'Active':
+            projects = Project.query.filter_by(active=True).all()
+        else:
+            projects = Project.query.filter_by(active=False).all()
+
+        projects = sorted(projects, key=lambda x: x.id)
+    else:
+        flash('You are not authorized to access this page.', 'danger')
+        return redirect(url_for('app.login'))
+    # projects = Project.query.all()
     clients = Client.query.all()
     projects_with_consultants = []
     for project in projects:
@@ -139,11 +185,16 @@ def assign_consultants(project_id):
         return redirect(url_for('projects.projects_consultants'))
     if request.method == 'POST':
         assigned_consultant = request.form.get('consultant')
-        hourly_rate = request.form.get('hourly_rate')
-        if not assigned_consultant or not hourly_rate:
+        currency = request.form.get('currency')
+        price = request.form.get('price')
+        hourly = request.form.get('hourly')
+        if not assigned_consultant or not price:
             flash('All fields are required', 'danger')
             return redirect(url_for('projects.assign_consultants', project_id=project_id))
-        project_consultant_new = ProjectConsultant(consultant_id=assigned_consultant, project_id=project_id, client_hourly_rate=hourly_rate)
+
+        project_consultant_new = ProjectConsultant(consultant_id=assigned_consultant, project_id=project_id, price=price, currency=currency)
+        if hourly:
+            project_consultant_new.hourly = True
         db.session.add(project_consultant_new)
         db.session.commit()
         return redirect(url_for('projects.projects_consultants'))
@@ -173,3 +224,45 @@ def delete_project_consultant(id):
         db.session.commit()
         flash('Consultant deleted successfully!', 'success')
     return redirect(url_for('projects.projects_consultants'))
+
+
+@projects_blueprint.route('/activate', methods=['POST'])
+@login_required
+@admin_required
+def activate():
+    id = request.form.get('id', None)
+    if not id:
+        flash('No project id provided.', 'danger')
+        return redirect(url_for('projects.manage_projects'))
+    project = Project.query.get(id)
+    if not project:
+        flash('Project not found with this id.', 'danger')
+        return redirect(url_for('projects.manage_projects'))
+    project.active = True
+    db.session.add(project)
+    db.session.commit()
+    flash('Project activated.', 'success')
+    return redirect(url_for('projects.manage_projects'))
+
+
+@projects_blueprint.route('/archive', methods=['POST'])
+@login_required
+@admin_required
+def archive():
+    id = request.form.get('id', None)
+    if not id:
+        flash('No project id provided.', 'danger')
+        return redirect(url_for('projects.manage_projects'))
+
+    project = Project.query.get(id)
+    if not project:
+        flash('Project not found with this id.', 'danger')
+        return redirect(url_for('projects.manage_projects'))
+    project.active = False
+    db.session.add(project)
+    db.session.commit()
+    flash('Project archived.', 'success')
+    return redirect(url_for('projects.manage_projects', status='Archived'))
+
+
+

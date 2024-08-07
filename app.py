@@ -30,7 +30,7 @@ def is_active(url):
 
 
 def is_activeSVG(url):
-    return 'invertt' if url in request.path else ''
+    return 'invert' if url in request.path else ''
 
 
 app.jinja_env.globals['is_active'] = is_active
@@ -184,8 +184,8 @@ def internal_server_error(e):
 
 # with app.app_context():
 #     db.drop_all()
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000, host='0.0.0.0')

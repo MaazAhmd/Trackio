@@ -146,19 +146,31 @@ def view_time_entries():
                 billable_formatted_mins = f"{billable_duration_mins:02}"
 
                 if entry.billable:
-                    billable_duration_str = f"{billable_formatted_hours}:{billable_formatted_mins}"
-                    non_billable_duration_str = "00:00"
-                    total_billable_duration += considerable_duration
-                    if not projectConsultant.client_hourly_rate:
-                        billable_amount = "No Hourly Rate Set"
-                    else:
-                        billable_amount = round((considerable_duration / 60) * projectConsultant.client_hourly_rate, 2)
-                        currency = client.currency.upper()
-                        if currency in total_billable_amount:
-                            total_billable_amount[currency] += billable_amount
+                    # that means Hourly:
+                    if not project.price:
+                        billable_duration_str = f"{billable_formatted_hours}:{billable_formatted_mins}"
+                        non_billable_duration_str = "00:00"
+                        total_billable_duration += considerable_duration
+                        if not projectConsultant.price:
+                            billable_amount = "No Hourly Rate Set"
                         else:
-                            total_billable_amount[currency] = billable_amount
-                        billable_amount = f'{currency} {billable_amount:.2f}'
+                            billable_amount = round((considerable_duration / 60) * projectConsultant.price, 2)
+                            currency = client.currency.upper()
+                            if currency in total_billable_amount:
+                                total_billable_amount[currency] += billable_amount
+                            else:
+                                total_billable_amount[currency] = billable_amount
+                            billable_amount = f'{currency} {billable_amount:.2f}'
+                    # that means NOT Hourly:
+                    else:
+                        billable_duration_str = f"{billable_formatted_hours}:{billable_formatted_mins}"
+                        non_billable_duration_str = "N/A"
+                        total_billable_duration += considerable_duration
+                        currency = client.currency.upper()
+
+                        billable_amount = project.price
+                        billable_amount = f'Fixed {currency} {billable_amount:.2f}'
+
                 else:
                     total_non_billable_duration += considerable_duration
                     non_billable_duration_str = f"{billable_formatted_hours}:{billable_formatted_mins}"
@@ -175,6 +187,13 @@ def view_time_entries():
         #              'notes': notes,
         #              'billable_amount': billable_amount, 'billable_duration': billable_duration,
         #              'non_billable_duration': non_billable_duration})
+
+        if project.price:
+            currency = client.currency.upper()
+            if currency in total_billable_amount:
+                total_billable_amount[currency] += project.price
+            else:
+                total_billable_amount[currency] = project.price
 
     total_billable_duration_hours = total_billable_duration // 60
     total_billable_duration_mins = total_billable_duration % 60
@@ -401,10 +420,10 @@ def time_entries_pdf():
                     billable_duration_str = f"{billable_formatted_hours}:{billable_formatted_mins}"
                     non_billable_duration_str = "00:00"
                     total_billable_duration += considerable_duration
-                    if not projectConsultant.client_hourly_rate:
+                    if not projectConsultant.price:
                         billable_amount = "No Hourly Rate Set"
                     else:
-                        billable_amount = round((considerable_duration / 60) * projectConsultant.client_hourly_rate, 2)
+                        billable_amount = round((considerable_duration / 60) * projectConsultant.price, 2)
                         currency = client.currency.upper()
                         if currency in total_billable_amount:
                             total_billable_amount[currency] += billable_amount

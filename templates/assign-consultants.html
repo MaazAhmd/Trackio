@@ -5,7 +5,7 @@
 
             <div class="card-header border-0 pt-5">
                 <h3 class="card-title align-items-start flex-column">
-                    <span class="card-label fw-bold fs-3 mb-1">Assign a Consultant</span>
+                    <span class="card-label fw-bold fs-3 mb-1">Add a Team Member</span>
                 </h3>
             </div>
 
@@ -19,9 +19,23 @@
                         {% endfor %}
                     </select>
 
-                    <label for="hourly_rate" class="form-label">Hourly Rate</label>
-                    <input type="number" id="hourly_rate" name="hourly_rate" class="form-control form-control-solid"
-                           placeholder="Enter Hourly Rate" required/>
+                    <div class="form-check d-flex flex-row mt-8">
+                        <input class="form-check-input" type="checkbox"
+                               value="hourly"
+                               id="hourly" name="hourly"/>
+                        <p class="mx-4">Paid on Hourly Basis?</p>
+                    </div>
+                    <div>
+                        <label for="currency" class="form-label mt-4">Enter the Currency</label>
+                        <input type="text" id="currency" name="currency" class="form-control form-control-solid"
+                               placeholder="Enter Currency" required/>
+                    </div>
+                    <div>
+                        <label for="client" class="form-label mt-4">Enter the Hourly Price or total Price
+                            offered</label>
+                        <input type="number" id="price" name="price" class="form-control form-control-solid"
+                               placeholder="Enter Price" required/>
+                    </div>
 
                     {% if errors %}
                         <ul>

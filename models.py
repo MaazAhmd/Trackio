@@ -17,6 +17,8 @@ class Project(db.Model):
     end_date = db.Column(db.Date)
     name = db.Column(db.String(200))
     description = db.Column(db.Text)
+    active = db.Column(db.Boolean, default=True)
+    price = db.Column(db.Float, nullable=True)
     consultants = db.relationship('ProjectConsultant', back_populates='project')
 
 class ProjectConsultant(db.Model):
@@ -24,8 +26,8 @@ class ProjectConsultant(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='CASCADE'), nullable=False)
     consultant_id = db.Column(db.Integer, db.ForeignKey('consultant.id', ondelete='CASCADE'), nullable=False)
     hourly = db.Column(db.Boolean, default=False)
-    client_hourly_rate = db.Column(db.Float)
     price = db.Column(db.Float)
+    currency = db.Column(db.String(10))
 
     project = db.relationship('Project', back_populates='consultants')
     consultant = db.relationship('Consultant', back_populates='projects')

@@ -44,6 +44,8 @@ def track_time():
         print(project.start_date, tracking_date, project.end_date)
         if not project.start_date <= tracking_date <= project.end_date:
             continue
+        if not project.active:
+            continue
         create_and_check_time_entries(project_consultant.id, tracking_date)
         project_time_entries = TimeEntry.query.filter_by(project_consultant_id=project_consultant.id, performance_date=tracking_date).order_by(asc(TimeEntry.id)).all()
 
@@ -75,13 +77,17 @@ def add_time_entry():
     description = request.form.get('description')
     hours = request.form.get('hours')
     minutes = request.form.get('minutes')
+
     entry = TimeEntry.query.get(time_entry_id)
+    project = Project.query.get(ProjectConsultant.query.get(entry.project_consultant_id).project_id)
 
     entry.description = description
     entry.hours = hours
     entry.minutes = minutes
     entry.tracked = True
     if request.form.get('billable'):
+        entry.billable = True
+    elif project.price:
         entry.billable = True
     else:
         entry.billable = False

@@ -23,6 +23,20 @@
                         {% endfor %}
                     </select>
 
+                    <div class="form-check d-flex flex-row mt-8">
+                        <input class="form-check-input" type="checkbox"
+                               value="hourly"
+                               id="hourly" name="hourly"/>
+                        <p class="mx-4">Is this Project Hourly Basis?</p>
+                    </div>
+                    <div>
+                        <label for="client" class="form-label mt-4">Enter the Price of this Project (if its NOT
+                            Hourly
+                            Basis)</label>
+                        <input type="number" id="price" name="price" class="form-control form-control-solid"
+                               placeholder="Enter Total Price" required/>
+                    </div>
+
                     <label for="description" class="form-label mt-4">Project Description</label>
                     <textarea id="description" name="description" class="form-control form-control-solid"
                               placeholder="Describe the Project..." rows="5" required>{% if project %}
