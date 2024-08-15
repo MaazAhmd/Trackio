@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 from sqlalchemy import asc, desc
 
 from helping_functions import admin_required
-from models import Client, db, Project, ProjectConsultant, TimeEntry, Consultant, User
+from models import Client, db, Project, ProjectConsultant, TimeEntry, Consultant, User, cache
 
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
@@ -25,12 +25,8 @@ payments = Blueprint('payments', __name__)
 @payments.route('/', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@cache.cached(timeout=5)
 def all_payments():
-    all_clients = Client.query.all()
-    all_projects = Project.query.all()
-    all_consultants = Consultant.query.all()
-
-    projectConsultants = ProjectConsultant.query.all()
     clients = Client.query
     projects = Project.query
     consultants = Consultant.query
@@ -121,6 +117,9 @@ def all_payments():
         end_date = None
 
     total_billable_amount = {}
+    paid_amount = {}
+    left_amount = {}
+
     for projectConsultant in projectConsultants:
         project = Project.query.get(projectConsultant.project_id)
         consultant = Consultant.query.get(projectConsultant.consultant_id)
@@ -142,16 +141,32 @@ def all_payments():
         else:
             total_billable_amount[currency] = projectConsultant.price
 
+        if projectConsultant.paid:
+            if currency in paid_amount:
+                paid_amount[currency] += projectConsultant.price
+            else:
+                paid_amount[currency] = projectConsultant.price
+        else:
+            if currency in left_amount:
+                left_amount[currency] += projectConsultant.remaining_price
+            else:
+                left_amount[currency] = projectConsultant.remaining_price
+
+
         data.append(
             {'project_name': project.name, 'client_name': client.name, 'consultant_name': consultant.name,
-             'price': projectConsultant.price, 'currency': projectConsultant.currency.upper()})
+             'price': f"{projectConsultant.price:.0f}", 'currency': projectConsultant.currency.upper(),
+             'paid': projectConsultant.paid, 'remaining_price': f"{projectConsultant.remaining_price:.0f}",
+             'id': projectConsultant.id})
 
         # data.append({'project_name': project.name, 'client_name': client.name, 'consultant_name': consultant.name,
         #              'notes': notes,
         #              'billable_amount': billable_amount, 'billable_duration': billable_duration,
         #              'non_billable_duration': non_billable_duration})
 
-    total_amount_str = ', '.join([f"{currency} {amount:.2f}" for currency, amount in total_billable_amount.items()])
+    total_amount_str = ', '.join([f"{currency} {amount:.0f}" for currency, amount in total_billable_amount.items()])
+    paid_amount_str = ', '.join([f"{currency} {amount:.0f}" for currency, amount in paid_amount.items()])
+    left_amount_str = ', '.join([f"{currency} {amount:.0f}" for currency, amount in left_amount.items()])
 
     # search = request.args.get('search')
     # if search:
@@ -202,7 +217,52 @@ def all_payments():
                            filter_client_name=filter_client_name, filter=filter_applied,
                            filter_time=time_filter,
                            start_date_filter=start_date_filter, end_date_filter=end_date_filter,
-                           total_amount_str=total_amount_str)
+                           total_amount_str=total_amount_str, paid_amount_str=paid_amount_str, left_amount_str=left_amount_str)
+
+
+
+@payments.route('/paid', methods=['POST'])
+@login_required
+@admin_required
+def paid():
+    id = request.form.get('id')
+    amount = request.form.get('amount')
+    project_consultant = ProjectConsultant.query.get_or_404(id)
+    if not amount:
+        flash("Amount is required")
+        return redirect(url_for('payments.all_payments'))
+    try:
+        amount = float(amount)
+    except ValueError:
+        flash("Amount must be numeric")
+        return redirect(url_for('payments.all_payments'))
+
+    if amount > project_consultant.remaining_price:
+        flash("Amount must be less than or equal to project price")
+        return redirect(url_for('payments.all_payments'))
+    new_remaining_amount = project_consultant.remaining_price - amount
+    if new_remaining_amount == 0:
+        project_consultant.paid = True
+
+    project_consultant.remaining_price = new_remaining_amount
+    db.session.add(project_consultant)
+    db.session.commit()
+    flash("Successfully updated Record", "success")
+    return redirect(url_for('payments.all_payments'))
+
+
+@payments.route('/unpaid', methods=['POST'])
+@login_required
+@admin_required
+def unpaid():
+    id = request.form.get('id')
+    project_consultant = ProjectConsultant.query.get_or_404(id)
+    project_consultant.paid = False
+    project_consultant.remaining_price = project_consultant.price
+    db.session.add(project_consultant)
+    db.session.commit()
+    flash("Successfully updated Record", "success")
+    return redirect(url_for('payments.all_payments'))
 
 
 @payments.route('/my-payments', methods=['GET', 'POST'])
@@ -265,6 +325,8 @@ def consultant_payments():
         end_date = None
 
     total_billable_amount = {}
+    paid_amount = {}
+    left_amount = {}
 
     for projectConsultant in project_consultants:
         project = Project.query.get(projectConsultant.project_id)
@@ -285,11 +347,25 @@ def consultant_payments():
         else:
             total_billable_amount[currency] = projectConsultant.price
 
-        data.append(
-            {'project_name': project.name, 'price': projectConsultant.price,
-             'currency': projectConsultant.currency.upper()})
+        if projectConsultant.paid:
+            if currency in paid_amount:
+                paid_amount[currency] += projectConsultant.price
+            else:
+                paid_amount[currency] = projectConsultant.price
+        else:
+            if currency in left_amount:
+                left_amount[currency] += projectConsultant.remaining_price
+            else:
+                left_amount[currency] = projectConsultant.remaining_price
 
-    total_amount_str = ', '.join([f"{currency} {amount:.2f}" for currency, amount in total_billable_amount.items()])
+        data.append(
+            {'project_name': project.name, 'price': f"{projectConsultant.price:.0f}", 'currency': projectConsultant.currency.upper(),
+             'paid': projectConsultant.paid, 'remaining_price': f"{projectConsultant.remaining_price:.0f}",
+             'id': projectConsultant.id})
+
+    total_amount_str = ', '.join([f"{currency} {amount:.0f}" for currency, amount in total_billable_amount.items()])
+    paid_amount_str = ', '.join([f"{currency} {amount:.0f}" for currency, amount in paid_amount.items()])
+    left_amount_str = ', '.join([f"{currency} {amount:.0f}" for currency, amount in left_amount.items()])
 
     search = request.args.get('search')
     if search:
@@ -333,7 +409,7 @@ def consultant_payments():
                            filter=filter_applied,
                            filter_time=time_filter,
                            start_date_filter=start_date_filter, end_date_filter=end_date_filter,
-                           total_amount_str=total_amount_str)
+                           total_amount_str=total_amount_str, paid_amount_str=paid_amount_str, left_amount_str=left_amount_str)
 
 
 @payments.route('/export-csv', methods=['POST'])

@@ -35,9 +35,6 @@
         </form>
         <!--begin::Filter menu-->
         <form action="{{ url_for('payments.all_payments') }}" class="d-flex flex-wrap gap-3 align-items-center my-8">
-
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
             <div>
                 <label for="filter_clients">Filter by Client:</label>
                 <select class="form-select form-select-solid" id="filter_clients" name="filter_clients"
@@ -199,18 +196,20 @@
         </div>
 
         <div class="d-flex flex-row flex-wrap mb-10 gap-3">
-            {#            <div class="bg-white card rounded-2">#}
-            {#                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Billable Duration</h4>#}
-            {#                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{{ total_billable_duration_str }}</h2>#}
-            {#            </div>#}
-            {#            <div class="bg-white card rounded-2">#}
-            {#                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Non-Billable Duration</h4>#}
-            {#                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{{ total_non_billable_duration_str }}</h2>#}
-            {#            </div>#}
             <div class="bg-white card rounded-2">
                 <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Total Amount</h4>
                 <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{% if total_amount_str == '' %}N/A{% else %}
                     {{ total_amount_str }}{% endif %}</h2>
+            </div>
+            <div class="bg-white card rounded-2">
+                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Amount Paid</h4>
+                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{% if paid_amount_str == '' %}N/A{% else %}
+                    {{ paid_amount_str }}{% endif %}</h2>
+            </div>
+            <div class="bg-white card rounded-2">
+                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Amount Left</h4>
+                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{% if left_amount_str == '' %}N/A{% else %}
+                    {{ left_amount_str }}{% endif %}</h2>
             </div>
         </div>
 
@@ -227,27 +226,22 @@
                         <span class="text-muted fw-semibold fs-7">Showing All:</span>
                     {% endif %}
                 </h3>
-                <!--begin::Filter menu-->
-                {#                <div>#}
-                {#                    <select class="form-select form-select-solid" id="selectMonth" name="month" data-kt-select1="true"#}
-                {#                            data-close-on-select="false"#}
-                {#                            data-placeholder="{% if month %}{{ month }}{% else %}Select option{% endif %}"#}
-                {#                            data-dropdown-parent="#kt_menu_64b776349d09d" data-allow-clear="true">#}
-                {#                        {% if month %}#}
-                {#                            <option selected>{{ month }}</option>#}
-                {#                        {% endif %}#}
-                {#                        <option value="January-2023">January-2023</option>#}
-                {#                        <option value="February-2023">February-2023</option>#}
-                {#                        <option value="March-2023">March-2023</option>#}
-                {#                        <option value="April-2023">April-2023</option>#}
-                {#                        <option value="May-2023">May-2023</option>#}
-                {#                        <option value="June-2023">June-2023</option>#}
-                {#                        <option value="July-2023">July-2023</option>#}
-                {#                        <option value="August-2023">August-2023</option>#}
-                {#                    </select>#}
-                {#                </div>#}
-                <!--end::Filter menu-->
                 <div class="card-toolbar">
+                    <div>
+                        <select class="form-select form-select-solid" id="selectMonth" name="month"
+                                data-kt-select1="true"
+                                data-close-on-select="false"
+                                data-placeholder="{% if month %}{{ month }}{% else %}Select option{% endif %}"
+                                data-dropdown-parent="#kt_menu_64b776349d09d" data-allow-clear="true">
+                            {% if show_payments_filter %}
+                                <option selected>{{ show_payments_filter }}</option>
+                            {% endif %}
+                            <option value="January-2023">All</option>
+                            <option value="February-2023">Pending</option>
+                            <option value="March-2023">Completed</option>
+
+                        </select>
+                    </div>
                     <!--begin::Menu-->
                     <div class="card-toolbar">
                         <form action="{{ url_for('time_entries.time_entries_pdf') }}" class="ms-5">
@@ -368,7 +362,7 @@
                                     <!--end::Menu 1-->
                                 </div>
                             </th>
-                            <th class="min-w-100px">
+                            <th class="min-w-150px">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span class="me-1">Project Name</span>
                                     <!--begin::Menu toggle-->
@@ -447,7 +441,7 @@
                                 </div>
                             </th>
 
-                            <th class="min-w-90px">
+                            <th class="min-w-150px">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span class="me-1">Consultant</span>
                                     <!--begin::Menu toggle-->
@@ -526,6 +520,8 @@
                                 </div>
                             </th>
                             <th class="min-w-100px billable-amount-column">Amount</th>
+                            <th class="min-w-50px billable-amount-column">Status</th>
+                            <th class="min-w-50px billable-amount-column text-end">Actions</th>
 
                         </tr>
                         </thead>
@@ -538,6 +534,87 @@
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['project_name'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['consultant_name'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6 billable-amount-column">{{ project['currency'] }} {{ project['price'] }}</td>
+                                <td>
+                                    {% if project['paid'] %}
+                                        <div>
+                                            <span class="badge py-2 px-4 fs-7 badge-light-success">Paid</span>
+                                        </div>
+                                    {% elif project['price']!=project['remaining_price'] %}
+                                        <div class="mb-2">
+                                            <span class="badge py-2 px-4 fs-7 badge-light-warning">Partially Paid</span>
+                                        </div>
+                                        <div>
+                                            <span class="badge py-2 px-4 fs-7 badge-light-warning">{{ project['currency'] }} {{ project['remaining_price'] }} Left</span>
+                                        </div>
+                                    {% else %}
+                                        <div>
+                                            <span class="badge py-2 px-4 fs-7 badge-light-danger">Not Paid</span>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if project['paid'] %}
+                                        <form action="{{ url_for('payments.unpaid') }}" method="post">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="id" value="{{ project['id'] }}">
+                                            <button type="submit"
+                                                    class="btn btn-bg-light btn-active-color-primary btn-sm me-1">
+                                                Set as Unpaid
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <!-- Unique form ID for each project -->
+                                        <form id="paymentForm-{{ project['id'] }}"
+                                              action="{{ url_for('payments.paid') }}" method="post">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="id" value="{{ project['id'] }}">
+                                            <input type="hidden" class="form-control form-control-solid px-2"
+                                                   name="amount">
+                                            <!-- The Paid button opens the modal -->
+                                            <button type="button"
+                                                    class="btn btn-bg-light btn-active-color-primary btn-sm me-1"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#paymentModal-{{ project['id'] }}">
+                                                Set as Paid
+                                            </button>
+                                        </form>
+
+                                        <!-- Modal HTML, unique ID for each project -->
+                                        <div class="modal fade" id="paymentModal-{{ project['id'] }}" tabindex="-1"
+                                             aria-labelledby="paymentModalLabel-{{ project['id'] }}"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title"
+                                                            id="paymentModalLabel-{{ project['id'] }}">Enter Paid
+                                                            Amount</h5>
+                                                        <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Modal form -->
+                                                        <form id="modalForm-{{ project['id'] }}">
+                                                            <input type="text"
+                                                                   class="form-control form-control-solid px-2"
+                                                                   style="width: 100%;" name="amount"
+                                                                   placeholder="Enter Paid Amount">
+                                                        </form>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-bs-dismiss="modal">Close
+                                                        </button>
+                                                        <!-- Submit button specific to each project -->
+                                                        <button type="button" class="btn btn-primary submitPayment"
+                                                                data-project-id="{{ project['id'] }}">Submit Payment
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -549,7 +626,6 @@
             </div>
             <!--begin::Body-->
         </div>
-
     </div>
 </div>
 
@@ -564,7 +640,21 @@
     {#        console.log(location.href);#}
     {##}
     {#    });#}
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.submitPayment').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const projectId = this.getAttribute('data-project-id');
+                const modalForm = document.querySelector(`#modalForm-${projectId} input[name="amount"]`);
+                const mainForm = document.querySelector(`#paymentForm-${projectId} input[name="amount"]`);
 
+                // Set the amount in the main form
+                mainForm.value = modalForm.value;
+
+                // Submit the main form
+                document.getElementById(`paymentForm-${projectId}`).submit();
+            });
+        });
+    });
 
     function submitFormCSV() {
         // Get the data from the table rows

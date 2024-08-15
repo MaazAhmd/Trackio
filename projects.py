@@ -196,6 +196,10 @@ def assign_consultants(project_id):
         project_consultant_new = ProjectConsultant(consultant_id=assigned_consultant, project_id=project_id, price=price, currency=currency)
         if hourly:
             project_consultant_new.hourly = True
+        else:
+            project_consultant_new.hourly = False
+            project_consultant_new.paid = False
+            project_consultant_new.remaining_price = price
         db.session.add(project_consultant_new)
         db.session.commit()
         return redirect(url_for('projects.projects_consultants'))

@@ -1,5 +1,8 @@
+from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+
+cache = Cache(config={'CACHE_TYPE': 'SimpleCache'})
 
 db = SQLAlchemy()
 
@@ -28,6 +31,8 @@ class ProjectConsultant(db.Model):
     hourly = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float)
     currency = db.Column(db.String(10))
+    paid = db.Column(db.Boolean, default=False)
+    remaining_price = db.Column(db.Float)
 
     project = db.relationship('Project', back_populates='consultants')
     consultant = db.relationship('Consultant', back_populates='projects')

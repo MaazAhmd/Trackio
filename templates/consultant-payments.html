@@ -110,6 +110,16 @@
                 <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{% if total_amount_str == '' %}N/A{% else %}
                     {{ total_amount_str }}{% endif %}</h2>
             </div>
+            <div class="bg-white card rounded-2">
+                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Amount Paid</h4>
+                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{% if paid_amount_str == '' %}N/A{% else %}
+                    {{ paid_amount_str }}{% endif %}</h2>
+            </div>
+            <div class="bg-white card rounded-2">
+                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Amount Left</h4>
+                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{% if left_amount_str == '' %}N/A{% else %}
+                    {{ left_amount_str }}{% endif %}</h2>
+            </div>
         </div>
 
         <div class="card mb-5 mb-xl-8">
@@ -207,6 +217,7 @@
                             </th>
 
                             <th class="min-w-100px billable-amount-column">Amount</th>
+                            <th class="min-w-100px billable-amount-column">Status</th>
 
                         </tr>
                         </thead>
@@ -217,6 +228,24 @@
                             <tr>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['project_name'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6 billable-amount-column">{{ project['currency'] }} {{ project['price'] }}</td>
+                                <td>
+                                    {% if project['paid'] %}
+                                        <div>
+                                            <span class="badge py-2 px-4 fs-7 badge-light-success">Paid</span>
+                                        </div>
+                                    {% elif project['price']!=project['remaining_price'] %}
+                                        <div class="mb-2">
+                                            <span class="badge py-2 px-4 fs-7 badge-light-warning">Partially Paid</span>
+                                        </div>
+                                        <div>
+                                            <span class="badge py-2 px-4 fs-7 badge-light-warning">{{ project['currency'] }} {{ project['remaining_price'] }} Left</span>
+                                        </div>
+                                    {% else %}
+                                        <div>
+                                            <span class="badge py-2 px-4 fs-7 badge-light-danger">Not Paid</span>
+                                        </div>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>

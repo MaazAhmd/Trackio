@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 from time_tracking import time_tracking
 from time_entries import time_entries
@@ -7,7 +8,7 @@ from projects import projects_blueprint
 from payments import payments
 from config import Config
 from consultants import consultants_blueprint
-from models import User, db, Consultant, Consultant, Project
+from models import User, db, Consultant, Consultant, Project, cache
 from flask import request, flash
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -18,6 +19,8 @@ app.config.from_object(Config)
 db.init_app(app)
 migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
+
+cache.init_app(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
