@@ -10,6 +10,7 @@ clients_blueprint = Blueprint('clients', __name__)
 @clients_blueprint.route('/')
 @clients_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def manage_clients(id=None):
     if id:
         if not current_user.is_admin:

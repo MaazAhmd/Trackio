@@ -45,6 +45,8 @@
                                 {% if consultant.id == current_user.consultant_id %}
                                     <tr>
                                         <form action="" method="post">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                                             <th class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ consultant.id }}</th>
                                             <td class="text-dark fw-bold text-hover-primary mb-1 fs-6"><input
                                                     class="form-control form-control-solid ms-n3" type="text" id="name"

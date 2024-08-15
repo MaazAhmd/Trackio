@@ -12,6 +12,9 @@
             <div class="card-body py-3">
 
                 <form action="{{ url_for('projects.add_project') }}" method="post">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                     <label for="name" class="form-label">Project Name</label>
                     <input type="text" id="name" name="name" class="form-control form-control-solid"
                            placeholder="Enter Name" value="{% if project %}{{ project.name }}{% endif %}" required/>

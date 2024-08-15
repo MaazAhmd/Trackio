@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_wtf.csrf import CSRFProtect
 from time_tracking import time_tracking
 from time_entries import time_entries
 from clients import clients_blueprint
 from projects import projects_blueprint
+from payments import payments
 from config import Config
 from consultants import consultants_blueprint
 from models import User, db, Consultant, Consultant, Project
@@ -15,10 +17,16 @@ app = Flask(__name__, static_folder='assets')
 app.config.from_object(Config)
 db.init_app(app)
 migrate = Migrate(app, db)
+csrf = CSRFProtect(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+app.config["SESSION_COOKIE_SAMESITE"] = "strict"
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["REMEMBER_COOKIE_SAMESITE"] = "strict"
+app.config["REMEMBER_COOKIE_SECURE"] = True
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -41,6 +49,7 @@ app.register_blueprint(consultants_blueprint, url_prefix='/consultants')
 app.register_blueprint(projects_blueprint, url_prefix='/projects')
 app.register_blueprint(time_tracking, url_prefix='/')
 app.register_blueprint(time_entries, url_prefix='/')
+app.register_blueprint(payments, url_prefix='/payments')
 
 
 @app.route('/')

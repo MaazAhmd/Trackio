@@ -10,6 +10,7 @@ consultants_blueprint = Blueprint('consultants', __name__)
 @consultants_blueprint.route('/')
 @consultants_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def manage_consultants(id=None):
     consultants = Consultant.query.all()
     consultant = Consultant.query.get(id)

@@ -58,6 +58,9 @@
                             {% for consultant in project['consultants'] %}
                                 {% if id==consultant['project_consultant'].id %}
                                     <form action="{{ url_for('projects.projects_consultants', id=id) }}" method="post">
+
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                                         <input type="hidden" name="project_consultant_id"
                                                value="{{ consultant['project_consultant'].id }}">
                                         <tr>
@@ -121,9 +124,11 @@
                                         </td>
                                     </tr>
                                 {% endif %}
-                                {% else %}
+                            {% else %}
                                 <tr>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">No Members assigned. You are still the Owner of this Project.</td>
+                                    <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">No Members assigned. You
+                                        are still the Owner of this Project.
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>

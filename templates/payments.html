@@ -27,14 +27,14 @@
             <div class="d-flex align-items-center">
                 <button type="submit" class="btn btn-primary px-4 py-3 me-1">Search</button>
                 {% if search %}
-                    <a href="{{ url_for('time_entries.view_time_entries', filter_clients=filter_clients, filter_consultants=filter_consultants, filter_projects=filter_projects, filter_time=filter_time, start_date_filter=start_date_filter, end_date_filter=end_date_filter) }}"
+                    <a href="{{ url_for('payments.all_payments', filter_clients=filter_clients, filter_consultants=filter_consultants, filter_projects=filter_projects, filter_time=filter_time, start_date_filter=start_date_filter, end_date_filter=end_date_filter) }}"
                        class="btn btn-secondary px-4 py-3 me-1">Reset</a>{% endif %}
-                <a href="{{ url_for('time_entries.view_time_entries') }}" class="btn btn-secondary px-4 py-3 me-1">Reset
+                <a href="{{ url_for('payments.all_payments') }}" class="btn btn-secondary px-4 py-3 me-1">Reset
                     All Filters</a>
             </div>
         </form>
         <!--begin::Filter menu-->
-        <form action="{{ url_for('time_entries.view_time_entries') }}" class="d-flex flex-wrap gap-3 align-items-center my-8">
+        <form action="{{ url_for('payments.all_payments') }}" class="d-flex flex-wrap gap-3 align-items-center my-8">
 
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
@@ -109,25 +109,24 @@
             <div class="d-flex align-items-center">
                 <button type="submit" class="btn btn-primary px-4 py-3 me-1">Apply Filters</button>
                 {% if filter %}
-                    <a href="{{ url_for('time_entries.view_time_entries', search=search, filter_time=filter_time, start_date_filter=start_date_filter, end_date_filter=end_date_filter) }}"
+                    <a href="{{ url_for('payments.all_payments', search=search, filter_time=filter_time, start_date_filter=start_date_filter, end_date_filter=end_date_filter) }}"
                        class="btn btn-secondary px-4 py-3 me-1">Reset Filters</a>{% endif %}
             </div>
         </form>
         <!--end::Filter menu-->
         <div class="d-flex flex-wrap gap-3 align-items-center">
-            <form action="{{ url_for('time_entries.view_time_entries') }}" class="d-flex align-items-center mb-5">
-
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
+            <form action="{{ url_for('payments.all_payments') }}" class="d-flex align-items-center mb-5">
                 <!-- Filter by Time -->
                 <div>
-                    <label for="filter_time">Showing Entries For:</label>
+                    <label for="filter_time">Showing Payments For:</label>
                     <select class="form-select form-select-solid" id="filter_time" name="filter_time"
                             data-kt-select1="true"
                             data-close-on-select="false"
                             data-placeholder="Select option"
                             data-dropdown-parent="#kt_menu_64b776349d09d" data-allow-clear="true">
                         {% if filter_time is not none %}
+                            <option {% if filter_time == 'all-time' %}selected{% endif %} value="all-time">All Time
+                            </option>
                             <option {% if filter_time == 'this-month' %}selected{% endif %} value="this-month">This
                                 Month
                             </option>
@@ -140,7 +139,8 @@
                             </option>
                             <option {% if filter_time == 'custom' %}selected{% endif %} value="custom">Custom</option>
                         {% else %}
-                            <option selected value="this-month">This Month</option>
+                            <option selected value="all-time">This Month</option>
+                            <option value="this-month">This Month</option>
                             <option value="last-month">Last Month</option>
                             <option value="this-year">This Year</option>
                             <option value="last-year">Last Year</option>
@@ -158,14 +158,13 @@
 
                 <div class="d-flex align-items-center mt-5 ms-10">
                     <button type="submit" class="btn btn-primary px-4 py-3 me-1">Apply Time Filter</button>
-                    {#                {% if filter_time and filter_time != 'custom' %}<a href="{{ url_for('time_entries.view_time_entries') }}"#}
+                    {#                {% if filter_time and filter_time != 'custom' %}<a href="{{ url_for('payments.all_payments') }}"#}
                     {#                                  class="btn btn-secondary px-4 py-3 me-1">Reset Filters</a>{% endif %}#}
                 </div>
             </form>
-            <form action="{{ url_for('time_entries.view_time_entries') }}" class="d-flex flex-wrap gap-3 align-items-center mt-5 mb-10">
+            <form action="{{ url_for('payments.all_payments') }}"
+                  class="d-flex flex-wrap gap-3 align-items-center mt-5 mb-10">
                 <!-- Filter by Time -->
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
                 <input type="hidden" name="filter_time" value="custom">
                 <div>
                     {#            <label for="filter_project">Or Choose a Custom Period:</label>#}
@@ -192,7 +191,7 @@
                 <div class="d-flex align-items-center mt-5">
                     <button type="submit" class="btn btn-primary px-4 py-3 me-1">Apply Custom Time Filter</button>
                     {% if filter_time %}
-                        <a href="{{ url_for('time_entries.view_time_entries', filter_clients=filter_clients, filter_consultants=filter_consultants, filter_projects=filter_projects, search=search) }}"
+                        <a href="{{ url_for('payments.all_payments', filter_clients=filter_clients, filter_consultants=filter_consultants, filter_projects=filter_projects, search=search) }}"
                            class="btn btn-secondary px-4 py-3 me-1">Reset Time
                             Filters</a>{% endif %}
                 </div>
@@ -200,16 +199,16 @@
         </div>
 
         <div class="d-flex flex-row flex-wrap mb-10 gap-3">
+            {#            <div class="bg-white card rounded-2">#}
+            {#                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Billable Duration</h4>#}
+            {#                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{{ total_billable_duration_str }}</h2>#}
+            {#            </div>#}
+            {#            <div class="bg-white card rounded-2">#}
+            {#                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Non-Billable Duration</h4>#}
+            {#                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{{ total_non_billable_duration_str }}</h2>#}
+            {#            </div>#}
             <div class="bg-white card rounded-2">
-                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Billable Duration</h4>
-                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{{ total_billable_duration_str }}</h2>
-            </div>
-            <div class="bg-white card rounded-2">
-                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Non-Billable Duration</h4>
-                <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{{ total_non_billable_duration_str }}</h2>
-            </div>
-            <div class="bg-white card rounded-2">
-                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Billable Amount</h4>
+                <h4 class="bg-primary text-white fs-3 px-5 py-2 rounded-2">Total Amount</h4>
                 <h2 class="fs-4 px-5 py-2 rounded-2 text-center">{% if total_amount_str == '' %}N/A{% else %}
                     {{ total_amount_str }}{% endif %}</h2>
             </div>
@@ -219,7 +218,7 @@
             <!--begin::Header-->
             <div class="card-header border-0 pt-5">
                 <h3 class="card-title align-items-start flex-column">
-                    <span class="card-label fw-bold fs-3 mb-1">Time Entries</span>
+                    <span class="card-label fw-bold fs-3 mb-1">Payments</span>
                     {% if search %}
                         <span class="text-muted fw-semibold fs-7">Search Results: '{{ search }}'</span>
                     {% elif filter %}
@@ -251,10 +250,6 @@
                 <div class="card-toolbar">
                     <!--begin::Menu-->
                     <div class="card-toolbar">
-                        <button type="button" id="toggleButton" onclick="toggleColumn()"
-                                class="btn btn-sm btn-light-primary">Show/Hide Billable Amount
-                        </button>
-
                         <form action="{{ url_for('time_entries.time_entries_pdf') }}" class="ms-5">
                             {% if filter_clients %}
                                 <input type="hidden" name="filter_clients" value="{{ filter_clients }}">{% endif %}
@@ -530,25 +525,19 @@
                                     <!--end::Menu 1-->
                                 </div>
                             </th>
-                            <th class="min-w-100px">Note</th>
-                            <th class="min-w-100px">Billable Duration</th>
-                            <th class="min-w-100px">Non-Billable Duration</th>
-                            <th class="min-w-100px billable-amount-column">Billable Amount</th>
+                            <th class="min-w-100px billable-amount-column">Amount</th>
 
                         </tr>
                         </thead>
                         <!--end::Table head-->
                         <!--begin::Table body-->
                         <tbody>
-                        {% for entry in data %}
+                        {% for project in data %}
                             <tr>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['client_name'] }}</td>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['project_name'] }}</td>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['consultant_name'] }}</td>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['notes'] }}</td>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['billable_duration'] }}</td>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['non_billable_duration'] }}</td>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6 billable-amount-column">{{ entry['billable_amount'] }}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['client_name'] }}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['project_name'] }}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ project['consultant_name'] }}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6 billable-amount-column">{{ project['currency'] }} {{ project['price'] }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -576,16 +565,6 @@
     {##}
     {#    });#}
 
-
-    function toggleColumn() {
-        // Get all elements with the class 'billable-amount-column'
-        console.log('here');
-        var elements = document.querySelectorAll('.billable-amount-column');
-        // Toggle the 'hidden' class on each element
-        elements.forEach(function (element) {
-            element.classList.toggle('hidden');
-        });
-    }
 
     function submitFormCSV() {
         // Get the data from the table rows

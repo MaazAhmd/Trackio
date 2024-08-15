@@ -10,6 +10,7 @@ projects_blueprint = Blueprint('projects', __name__)
 @projects_blueprint.route('/')
 @projects_blueprint.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def manage_projects(id=None):
     if id is not None:
         if not current_user.is_admin:

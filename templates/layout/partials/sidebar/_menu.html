@@ -46,17 +46,17 @@
                         ><span class="menu-title">Daily Time Tracking</span></a
                         ><!--end:Menu link-->
                         </div>
-                    {% if current_user.is_admin %}
-                        <div class="menu-item">
-                            <!--begin:Menu link--><a
-                                class="menu-link {% if page=='time-entries' %} active {% endif %}"
-                                href="{{ url_for('time_entries.view_time_entries') }}"
-                        ><span class="menu-bullet"
-                        ><span class="bullet bullet-dot"></span></span
-                        ><span class="menu-title">View Time Entries</span></a
-                        ><!--end:Menu link-->
-                        </div>
-                    {% endif %}
+                        {% if current_user.is_admin %}
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='time-entries' %} active {% endif %}"
+                                    href="{{ url_for('time_entries.view_time_entries') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">View Time Entries</span></a
+                            ><!--end:Menu link-->
+                            </div>
+                        {% endif %}
                         <!--end:Menu item--><!--begin:Menu item-->
                     </div>
                 </div>
@@ -75,47 +75,67 @@
                 ><!--end:Menu link--><!--begin:Menu sub-->
                     <div class="menu-sub menu-sub-accordion">
                         <!--begin:Menu item-->
-                        <div class="menu-item">
-                            <!--begin:Menu link--><a
-                                class="menu-link {% if page=='view-clients' %} active {% endif %}"
-                                href="{{ url_for('clients.manage_clients') }}"
-                        ><span class="menu-bullet"
-                        ><span class="bullet bullet-dot"></span></span
-                        ><span class="menu-title">Clients</span></a
-                        ><!--end:Menu link-->
-                        </div>
-                        <!--end:Menu item--><!--begin:Menu item-->
-                        <!--begin:Menu item-->
-                        <div class="menu-item">
-                            <!--begin:Menu link--><a
-                                class="menu-link {% if page=='view-consultants' %} active {% endif %}"
-                                href="{{ url_for('consultants.manage_consultants') }}"
-                        ><span class="menu-bullet"
-                        ><span class="bullet bullet-dot"></span></span
-                        ><span class="menu-title">Consultants</span></a
-                        ><!--end:Menu link-->
-                        </div>
-                        <!--end:Menu item--><!--begin:Menu item-->
-                        <div class="menu-item">
-                            <!--begin:Menu link--><a
-                                class="menu-link {% if page=='view-projects' %} active {% endif %}"
-                                href="{{ url_for('projects.manage_projects') }}"
-                        ><span class="menu-bullet"
-                        ><span class="bullet bullet-dot"></span></span
-                        ><span class="menu-title">Projects</span></a
-                        ><!--end:Menu link-->
-                        </div>
-                    {% if current_user.is_admin %}
-                        <div class="menu-item">
-                            <!--begin:Menu link--><a
-                                class="menu-link {% if page=='projects-consultants' %} active {% endif %}"
-                                href="{{ url_for('projects.projects_consultants') }}"
-                        ><span class="menu-bullet"
-                        ><span class="bullet bullet-dot"></span></span
-                        ><span class="menu-title">Project Members</span></a
-                        ><!--end:Menu link-->
-                        </div>
-                    {% endif %}
+                        {% if current_user.is_admin %}
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='view-clients' %} active {% endif %}"
+                                    href="{{ url_for('clients.manage_clients') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">Clients</span></a
+                            ><!--end:Menu link-->
+                            </div>
+                            <!--end:Menu item--><!--begin:Menu item-->
+                            <!--begin:Menu item-->
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='view-consultants' %} active {% endif %}"
+                                    href="{{ url_for('consultants.manage_consultants') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">Consultants</span></a
+                            ><!--end:Menu link-->
+                            </div>
+                            <!--end:Menu item--><!--begin:Menu item-->
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='view-projects' %} active {% endif %}"
+                                    href="{{ url_for('projects.manage_projects') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">Projects</span></a
+                            ><!--end:Menu link-->
+                            </div>
+
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='projects-consultants' %} active {% endif %}"
+                                    href="{{ url_for('projects.projects_consultants') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">Project Members</span></a
+                            ><!--end:Menu link-->
+                            </div>
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='payments' %} active {% endif %}"
+                                    href="{{ url_for('payments.all_payments') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">Payments</span></a
+                            ><!--end:Menu link-->
+                            </div>
+                        {% else %}
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='consultant-payments' %} active {% endif %}"
+                                    href="{{ url_for('payments.consultant_payments') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">Your Payments</span></a
+                            ><!--end:Menu link-->
+                            </div>
+                        {% endif %}
                     </div>
                     <!--end:Menu sub-->
                 </div>

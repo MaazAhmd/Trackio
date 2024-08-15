@@ -12,6 +12,9 @@
             <div class="card-body py-3">
 
                 <form action="{{ url_for('consultants.add_consultant') }}" method="post">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                     <label for="name" class="form-label">Consultant Name</label>
                     <input type="text" id="name" name="name" class="form-control form-control-solid"
                            placeholder="Enter Name" value="{% if consultant %}{{ consultant.name }}{% endif %}"

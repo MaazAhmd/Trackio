@@ -71,6 +71,8 @@
                                     {% for time_entry in project['time_entry'] %}
                                         <tr>
                                             <form action="{{ url_for('time_tracking.add_time_entry') }}" method="post">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                                                 <input type="hidden" value="{{ time_entry.id }}"
                                                        name="time_entry_id">
                                                 <input type="hidden" name="tracking_date" value="{{ tracking_date }}">

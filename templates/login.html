@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-    <title>Login - AdminPilot</title>
+    <title>Login - Trackio</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta property="og:locale" content="en_US"/>
@@ -98,6 +98,9 @@ if (document.documentElement) {
                             </div>
                             <!--end::Separator-->
                             <!--begin::Input group=-->
+
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                             <div class="fv-row mb-8">
                                 <!--begin::Email-->
                                 <input type="text" placeholder="Username" name="username" autocomplete="off"
