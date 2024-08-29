@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
+
+from helping_functions import sendEmail
 from time_tracking import time_tracking
 from time_entries import time_entries
 from clients import clients_blueprint
@@ -8,6 +10,7 @@ from projects import projects_blueprint
 from payments import payments
 from config import Config
 from consultants import consultants_blueprint
+from communication_time import communication_times_blueprint
 from models import User, db, Consultant, Consultant, Project, cache
 from flask import request, flash
 from flask_migrate import Migrate
@@ -53,6 +56,7 @@ app.register_blueprint(projects_blueprint, url_prefix='/projects')
 app.register_blueprint(time_tracking, url_prefix='/')
 app.register_blueprint(time_entries, url_prefix='/')
 app.register_blueprint(payments, url_prefix='/payments')
+app.register_blueprint(communication_times_blueprint, url_prefix='/communication_times')
 
 
 @app.route('/')
@@ -199,5 +203,28 @@ def internal_server_error(e):
 # with app.app_context():
 #     db.create_all()
 
+@app.route('/payments/request-payment', methods=['POST'])
+@csrf.exempt
+def request_payment():
+    try:
+        print('here')
+        data = request.get_json()
+
+        custom_message = data.get('message')
+        project = data.get('project')
+
+        sendEmail("Umer", custom_message, project)
+
+        # Mock response for demonstration
+        result = True  # or False depending on your logic
+
+        if result:
+            return jsonify({"status": "success"})
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "failed"})
+
+
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=5001, host='0.0.0.0')

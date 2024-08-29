@@ -138,20 +138,21 @@ def delete_project(id):
 @admin_required
 def projects_consultants(id=None):
     if request.method == 'POST':
+        status = request.form.get('status')
         currency = request.form.get('currency')
         price = request.form.get('price')
         if not price or not currency:
             flash('Price and Currency are required', 'danger')
-            return redirect(url_for('projects.projects_consultants'))
+            return redirect(url_for('projects.projects_consultants', status=status))
         project_consultant_object = ProjectConsultant.query.get(id)
         if not project_consultant_object:
             flash('Something went wrong. No matching record found in the database.')
-            return redirect(url_for('projects.projects_consultants'))
+            return redirect(url_for('projects.projects_consultants', status=status))
         project_consultant_object.price = price
         project_consultant_object.currency = currency
         db.session.add(project_consultant_object)
         db.session.commit()
-        return redirect(url_for('projects.projects_consultants'))
+        return redirect(url_for('projects.projects_consultants', status=status))
 
     status = request.args.get('status')
     if current_user.is_admin:
@@ -174,7 +175,7 @@ def projects_consultants(id=None):
             consultant = Consultant.query.get(project_consultant.consultant_id)
             consultants.append({'consultant': consultant, 'project_consultant': project_consultant})
         projects_with_consultants.append({'project': project, 'consultants': consultants})
-    return render_template('index.html', page='projects-consultants', projects=projects_with_consultants, clients=clients, id=id)
+    return render_template('index.html', page='projects-consultants', projects=projects_with_consultants, clients=clients, id=id, status=status)
 
 @projects_blueprint.route('/assign-consultants/<int:project_id>', methods=['GET', 'POST'])
 @login_required
@@ -202,7 +203,13 @@ def assign_consultants(project_id):
             project_consultant_new.remaining_price = price
         db.session.add(project_consultant_new)
         db.session.commit()
-        return redirect(url_for('projects.projects_consultants'))
+
+        if project.active:
+            status = "Active"
+        else:
+            status = "Archived"
+
+        return redirect(url_for('projects.projects_consultants', status=status))
 
     assigned_consultants = []
     project_consultants = ProjectConsultant.query.filter_by(project_id=project.id).all()

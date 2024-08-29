@@ -22,11 +22,6 @@ time_entries = Blueprint('time_entries', __name__)
 @time_entries.route('/time_entries', methods=['GET', 'POST'])
 @login_required
 def view_time_entries():
-    all_clients = Client.query.all()
-    all_projects = Project.query.all()
-    all_consultants = Consultant.query.all()
-
-    projectConsultants = ProjectConsultant.query.all()
     clients = Client.query
     projects = Project.query
     consultants = Consultant.query
@@ -117,18 +112,48 @@ def view_time_entries():
     total_billable_duration = 0
     total_non_billable_duration = 0
     total_billable_amount = {}
+
+    projects_calculated = []
+
+    project_ids = [pc.project_id for pc in projectConsultants]
+    projects = Project.query.filter(Project.id.in_(project_ids)).all()
+    project_dict = {project.id: project for project in projects}
+
+    customer_ids = {project.customer_id for project in projects}
+    clients = Client.query.filter(Client.id.in_(customer_ids)).all()
+    client_dict = {client.id: client for client in clients}
+
+    consultant_ids = {pc.consultant_id for pc in projectConsultants}
+    consultants = Consultant.query.filter(Consultant.id.in_(consultant_ids)).all()
+    consultant_dict = {consultant.id: consultant for consultant in consultants}
+
+    # Step 1: Extract all unique project_consultant_ids from projectConsultants
+    project_consultant_ids = [pc.id for pc in projectConsultants]
+
+    # Step 2: Fetch all relevant TimeEntry records in a single query
+    if start_date and end_date:
+        time_entries = TimeEntry.query.filter(
+            TimeEntry.project_consultant_id.in_(project_consultant_ids),
+            TimeEntry.performance_date >= start_date,
+            TimeEntry.performance_date <= end_date
+        ).all()
+    else:
+        time_entries = TimeEntry.query.filter(
+            TimeEntry.project_consultant_id.in_(project_consultant_ids)
+        ).all()
+
+    # Step 3: Create a dictionary mapping project_consultant_id to list of TimeEntry objects
+    time_entries_dict = {}
+    for entry in time_entries:
+        if entry.project_consultant_id not in time_entries_dict:
+            time_entries_dict[entry.project_consultant_id] = []
+        time_entries_dict[entry.project_consultant_id].append(entry)
+
     for projectConsultant in projectConsultants:
-        project = Project.query.get(projectConsultant.project_id)
-        consultant = Consultant.query.get(projectConsultant.consultant_id)
-        client = Client.query.get(project.customer_id)
-        if start_date and end_date:
-            related_entries = TimeEntry.query.filter(
-                TimeEntry.project_consultant_id == projectConsultant.id,
-                TimeEntry.performance_date >= start_date,
-                TimeEntry.performance_date <= end_date
-            ).all()
-        else:
-            related_entries = TimeEntry.query.filter_by(project_consultant_id=projectConsultant.id).all()
+        project = project_dict.get(projectConsultant.project_id)
+        consultant = consultant_dict.get(projectConsultant.consultant_id)
+        client = client_dict.get(project.customer_id)
+        related_entries = time_entries_dict.get(projectConsultant.id, [])
 
         for entry in related_entries:
             considerable_duration = 0
@@ -181,7 +206,7 @@ def view_time_entries():
                     {'project_name': project.name, 'client_name': client.name, 'consultant_name': consultant.name,
                      'notes': entry.description,
                      'billable_amount': billable_amount, 'billable_duration': billable_duration_str,
-                     'non_billable_duration': non_billable_duration_str})
+                     'non_billable_duration': non_billable_duration_str, 'date': entry.performance_date})
 
         # data.append({'project_name': project.name, 'client_name': client.name, 'consultant_name': consultant.name,
         #              'notes': notes,
@@ -189,11 +214,13 @@ def view_time_entries():
         #              'non_billable_duration': non_billable_duration})
 
         if project.price:
-            currency = client.currency.upper()
-            if currency in total_billable_amount:
-                total_billable_amount[currency] += project.price
-            else:
-                total_billable_amount[currency] = project.price
+            if project.id not in projects_calculated:
+                currency = client.currency.upper()
+                if currency in total_billable_amount:
+                    total_billable_amount[currency] += project.price
+                else:
+                    total_billable_amount[currency] = project.price
+                projects_calculated.append(project.id)
 
     total_billable_duration_hours = total_billable_duration // 60
     total_billable_duration_mins = total_billable_duration % 60
@@ -244,6 +271,8 @@ def view_time_entries():
 
         if sort_key:
             data = sorted(data, key=lambda x: x.get(sort_key, ''), reverse=reverse)
+
+    data = sorted(data, key=lambda x: x.get('date', ''), reverse=True)
 
     return render_template('index.html', page='time-entries', data=data, all_clients=clients,
                            all_projects=projects, all_consultants=consultants, filter_projects=filter_projects,

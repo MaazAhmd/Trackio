@@ -3,21 +3,14 @@ import json
 from io import BytesIO
 
 import pandas as pd
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, make_response, jsonify
 from flask_login import login_required, current_user
 from datetime import date, datetime, timedelta
 
-from sqlalchemy import asc, desc
+from flask_wtf.csrf import validate_csrf
 
-from helping_functions import admin_required
+from helping_functions import admin_required, sendEmail
 from models import Client, db, Project, ProjectConsultant, TimeEntry, Consultant, User, cache
-
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-import io
 
 payments = Blueprint('payments', __name__)
 

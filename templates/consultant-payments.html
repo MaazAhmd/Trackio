@@ -218,6 +218,7 @@
 
                             <th class="min-w-100px billable-amount-column">Amount</th>
                             <th class="min-w-100px billable-amount-column">Status</th>
+                            <th class="min-w-100px billable-amount-column text-end">Actions</th>
 
                         </tr>
                         </thead>
@@ -246,6 +247,13 @@
                                         </div>
                                     {% endif %}
                                 </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm btn-light btn-active-light-primary me-2"
+                                            data-bs-toggle="modal" data-bs-target="#requestPaymentModal"
+                                            data-project="{{ project['project_name'] }}">
+                                        Contact Regarding this Project
+                                    </button>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -254,12 +262,42 @@
                     <!--end::Table-->
                 </div>
                 <!--end::Table container-->
+                <!-- Modal -->
+                <div class="modal fade" id="requestPaymentModal" tabindex="-1"
+                     aria-labelledby="requestPaymentModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="requestPaymentModalLabel">Contact</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="requestPaymentForm">
+                                    <div class="mb-3">
+                                        <label for="customMessage" class="form-label">Custom Message</label>
+                                        <textarea class="form-control" id="customMessage" rows="3" required></textarea>
+                                    </div>
+                                    <div id="requestPaymentResult" class="text-success"></div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <!--begin::Body-->
         </div>
 
     </div>
 </div>
+
+<input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 
 <script>
 
@@ -319,5 +357,89 @@
         // Submit the form
         document.getElementById('export-form-excel').submit();
     }
+
+    // Event listener for when the modal is shown
+    {#var requestPaymentModal = document.getElementById('requestPaymentModal')#}
+    {#requestPaymentModal.addEventListener('show.bs.modal', function (event) {#}
+    {#    // Button that triggered the modal#}
+    {#    var button = event.relatedTarget#}
+    {##}
+    {#    // Extract info from data-* attributes#}
+    {#    var project = button.getAttribute('data-project')#}
+    {#    var message = button.getAttribute('data-message')#}
+    {##}
+    {#    // Update the modal's content#}
+    {#    var modalProject = requestPaymentModal.querySelector('#modalProject')#}
+    {#    var modalMessage = requestPaymentModal.querySelector('#modalMessage')#}
+    {#    var projectInput = requestPaymentModal.querySelector('#projectInput')#}
+    {#    var messageInput = requestPaymentModal.querySelector('#messageInput')#}
+    {##}
+    {#    modalProject.textContent = project#}
+    {#    modalMessage.textContent = message#}
+    {#    projectInput.value = project#}
+    {#    messageInput.value = message#}
+
+
+    {#document.getElementById("requestPaymentForm").addEventListener("submit", function (event) {#}
+    {#    event.preventDefault();#}
+    {##}
+    {#    // Gather form data#}
+    {#    var formData = new FormData(this);#}
+    {##}
+    {#    // Example of sending data via AJAX (using fetch API)#}
+    {#    fetch('/your-endpoint', {#}
+    {#        method: 'POST',#}
+    {#        body: formData,#}
+    {#    })#}
+    {#    .then(response => response.json())#}
+    {#    .then(data => {#}
+    {#        // Handle the response data#}
+    {#        console.log(data);#}
+    {#        // Close the modal#}
+    {#        var myModal = bootstrap.Modal.getInstance(requestPaymentModal);#}
+    {#        myModal.hide();#}
+    {#    })#}
+    {#    .catch(error => console.error('Error:', error));#}
+
+    document.getElementById("requestPaymentForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        let customMessage = document.getElementById("customMessage").value;
+        let csrfToken = document.getElementById("csrf_token").value;
+        console.log(customMessage);
+
+        {#let button = event.relatedTarget;#}
+        // Extract info from data-* attributes
+        {#let project = button.getAttribute('data-project');#}
+
+        fetch("/payments/request-payment", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message: customMessage,
+                {#project: project,#}
+                csrf_token: csrfToken
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("requestPaymentResult").innerText = data.status;
+                document.getElementById("requestPaymentResult").innerText = 'Email Sent Successfully.';
+                if (data.status === "success") {
+                    // Optionally, close the modal after a successful submission
+                    setTimeout(() => {
+                        let modal = bootstrap.Modal.getInstance(document.getElementById('requestPaymentModal'));
+                        modal.hide();
+                    }, 2000);
+                    document.getElementById("requestPaymentResult").innerText = ''
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("requestPaymentResult").innerText = "An error occurred.";
+            });
+    });
 
 </script>

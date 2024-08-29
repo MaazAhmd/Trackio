@@ -39,8 +39,19 @@ def track_time():
     five_day_array = [tracking_datetime - timedelta(days=2), tracking_datetime - timedelta(days=1), tracking_datetime, tracking_datetime + timedelta(days=1), tracking_datetime + timedelta(days=2)]
 
     project_consultants = ProjectConsultant.query.filter_by(consultant_id=consultant_id).all()
+
+    # Step 1: Extract all unique project_ids from project_consultants
+    project_ids = [pc.project_id for pc in project_consultants]
+
+    # Step 2: Fetch all relevant Project records in a single query
+    projects = Project.query.filter(Project.id.in_(project_ids)).all()
+
+    # Step 3: Create a dictionary mapping project_id to Project object
+    project_dict = {project.id: project for project in projects}
+
+    # Step 4: Iterate over project_consultants and use the dictionary to get the Project object
     for project_consultant in project_consultants:
-        project = Project.query.get(project_consultant.project_id)
+        project = project_dict.get(project_consultant.project_id)
         print(project.start_date, tracking_date, project.end_date)
         if not project.start_date <= tracking_date <= project.end_date:
             continue

@@ -125,6 +125,15 @@
                             ><span class="menu-title">Payments</span></a
                             ><!--end:Menu link-->
                             </div>
+                            <div class="menu-item">
+                                <!--begin:Menu link--><a
+                                    class="menu-link {% if page=='view-communication-times' %} active {% endif %}"
+                                    href="{{ url_for('communication_times.manage_communication_times') }}"
+                            ><span class="menu-bullet"
+                            ><span class="bullet bullet-dot"></span></span
+                            ><span class="menu-title">Communication Times</span></a
+                            ><!--end:Menu link-->
+                            </div>
                         {% else %}
                             <div class="menu-item">
                                 <!--begin:Menu link--><a

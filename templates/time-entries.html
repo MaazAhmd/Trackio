@@ -254,6 +254,9 @@
                         <button type="button" id="toggleButton" onclick="toggleColumn()"
                                 class="btn btn-sm btn-light-primary">Show/Hide Billable Amount
                         </button>
+                        <button type="button" id="toggleButton" onclick="toggleColumnNonBillable()"
+                                class="btn btn-sm btn-light-primary ms-5">Show/Hide Non-Billable Duration
+                        </button>
 
                         <form action="{{ url_for('time_entries.time_entries_pdf') }}" class="ms-5">
                             {% if filter_clients %}
@@ -293,8 +296,8 @@
                         <!--begin::Table head-->
                         <thead>
                         <tr class="fw-bold text-muted">
-                            <!-- <th class="min-w-80px">1 Month Rank
-                                <div class="mt-2"> -->
+
+                            <th class="min-w-100px">Date</th>
                             <th class="min-w-90px">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span class="me-1">Client</span>
@@ -532,7 +535,7 @@
                             </th>
                             <th class="min-w-100px">Note</th>
                             <th class="min-w-100px">Billable Duration</th>
-                            <th class="min-w-100px">Non-Billable Duration</th>
+                            <th class="min-w-100px non-billable-duration-column">Non-Billable Duration</th>
                             <th class="min-w-100px billable-amount-column">Billable Amount</th>
 
                         </tr>
@@ -542,12 +545,13 @@
                         <tbody>
                         {% for entry in data %}
                             <tr>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['date'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['client_name'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['project_name'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['consultant_name'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['notes'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['billable_duration'] }}</td>
-                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ entry['non_billable_duration'] }}</td>
+                                <td class="text-dark fw-bold text-hover-primary mb-1 fs-6 non-billable-duration-column">{{ entry['non_billable_duration'] }}</td>
                                 <td class="text-dark fw-bold text-hover-primary mb-1 fs-6 billable-amount-column">{{ entry['billable_amount'] }}</td>
                             </tr>
                         {% endfor %}
@@ -581,6 +585,15 @@
         // Get all elements with the class 'billable-amount-column'
         console.log('here');
         var elements = document.querySelectorAll('.billable-amount-column');
+        // Toggle the 'hidden' class on each element
+        elements.forEach(function (element) {
+            element.classList.toggle('hidden');
+        });
+    }
+    function toggleColumnNonBillable() {
+        // Get all elements with the class 'billable-amount-column'
+        console.log('here');
+        var elements = document.querySelectorAll('.non-billable-duration-column');
         // Toggle the 'hidden' class on each element
         elements.forEach(function (element) {
             element.classList.toggle('hidden');

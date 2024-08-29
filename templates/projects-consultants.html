@@ -60,6 +60,7 @@
                                     <form action="{{ url_for('projects.projects_consultants', id=id) }}" method="post">
 
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="status" value="{{ status }}">
 
                                         <input type="hidden" name="project_consultant_id"
                                                value="{{ consultant['project_consultant'].id }}">
@@ -85,7 +86,7 @@
                                                     </svg>
 
                                                 </button>
-                                                <a href="{{ url_for('projects.projects_consultants') }}"
+                                                <a href="{{ url_for('projects.projects_consultants', status=status) }}"
                                                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                                          fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
@@ -103,7 +104,7 @@
                                         <td class="text-dark fw-bold text-hover-primary mb-1 fs-6">{{ consultant['project_consultant'].currency }} {{ consultant['project_consultant'].price }}
                                             {% if consultant['project_consultant'].hourly %} / Hour {% endif %}</td>
                                         <td class="text-end">
-                                            <a href="{{ url_for('projects.projects_consultants', id=consultant['project_consultant'].id ) }}"
+                                            <a href="{{ url_for('projects.projects_consultants', id=consultant['project_consultant'].id, status=status ) }}"
                                                class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                                 <i class="ki-duotone ki-pencil fs-2">
                                                     <span class="path1"></span>
@@ -111,7 +112,7 @@
                                                 </i>
                                             </a>
 
-                                            <a href="{{ url_for('projects.delete_project_consultant', id=consultant['project_consultant'].id ) }}"
+                                            <a href="{{ url_for('projects.delete_project_consultant', id=consultant['project_consultant'].id, status=status) }}"
                                                class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm delete-link">
                                                 <i class="ki-duotone ki-trash fs-2">
                                                     <span class="path1"></span>

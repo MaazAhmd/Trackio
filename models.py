@@ -63,3 +63,14 @@ class TimeEntry(db.Model):
     invoiced = db.Column(db.Boolean, default=False)
     billable = db.Column(db.Boolean, default=True)
     tracked = db.Column(db.Boolean, default=False)
+
+
+class CommunicationTime(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='CASCADE'), nullable=True)
+    hours = db.Column(db.Integer)
+    minutes = db.Column(db.Integer)
+    description = db.Column(db.Text)
+    date = db.Column(db.Date)
+
+
