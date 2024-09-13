@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from datetime import date, datetime, timedelta
 
 from sqlalchemy import asc, desc
-from models import Client, db, Project, ProjectConsultant, TimeEntry, Consultant
+from models import Client, db, Project, ProjectConsultant, TimeEntry, Consultant, CommunicationTime
 
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
@@ -230,6 +230,19 @@ def view_time_entries():
     total_non_billable_duration_str = f"{total_non_billable_duration_hours:02}:{total_non_billable_duration_mins:02}"
     total_amount_str = ', '.join([f"{currency} {amount:.2f}" for currency, amount in total_billable_amount.items()])
 
+    communication_times = CommunicationTime.query.filter(
+        CommunicationTime.date >= start_date,
+        CommunicationTime.date <= end_date
+    ).all()
+    total_mins = 0
+    for communication_time in communication_times:
+        total_mins += communication_time.hours * 60
+        total_mins += communication_time.minutes
+
+    total_communication_hours = total_mins // 60
+    total_communication_mins = total_mins % 60
+    total_communication_time_str = f"{total_communication_hours:02}:{total_communication_mins:02}"
+
     search = request.args.get('search')
     if search:
         search_term = search.lower()
@@ -283,7 +296,7 @@ def view_time_entries():
                            start_date_filter=start_date_filter, end_date_filter=end_date_filter,
                            total_billable_duration_str=total_billable_duration_str,
                            total_non_billable_duration_str=total_non_billable_duration_str,
-                           total_amount_str=total_amount_str)
+                           total_amount_str=total_amount_str, total_communication_time_str=total_communication_time_str)
 
 
 @time_entries.route('/export-time-entries-csv', methods=['POST'])

@@ -51,6 +51,7 @@ class User(UserMixin, db.Model):
     consultant_id = db.Column(db.Integer, db.ForeignKey('consultant.id', ondelete='CASCADE'), nullable=True)
     is_admin = db.Column(db.Boolean, default=False)
     password_set = db.Column(db.Boolean, default=False)
+    wrong_login_tries = db.Column(db.Integer, default=0)
 
 
 class TimeEntry(db.Model):

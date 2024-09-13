@@ -41,3 +41,26 @@ def sendEmail(sender, message, project):
     # create client and send
     client = mt.MailtrapClient(token=os.getenv("MAILTRAP_API_TOKEN"))
     client.send(mail)
+
+
+def otpEmail(username, otp):
+    mail = mt.Mail(
+        sender=mt.Address(email="trackio@demomailtrap.com", name="Trackio"),
+        to=[mt.Address(email="maazkhanahmad1@gmail.com")],
+        subject="OTP for Trackio",
+        html=f"""
+                    <html>
+                    <body>
+                        <h2>Dear {username}</h2>
+                        <p>This is your OTP for logging in at Trackio: <strong>{otp}</strong> </p>
+                        <p>This is only valid for 2 Minutes.</p>
+                        <p>Thank you!</p>
+                    </body>
+                    </html>
+                """,
+        text=f"Dear {username}.\nThis is your OTP for logging in at Trackio: <strong>{otp}</strong>\nThis is only valid for 2 Minutes.\n\nThank You!",
+    )
+
+    # create client and send
+    client = mt.MailtrapClient(token=os.getenv("MAILTRAP_API_TOKEN"))
+    client.send(mail)

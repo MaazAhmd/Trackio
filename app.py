@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import random
+from datetime import datetime, timedelta
+
+import requests
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, abort
 from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 
-from helping_functions import sendEmail
+from helping_functions import sendEmail, otpEmail
 from time_tracking import time_tracking
 from time_entries import time_entries
 from clients import clients_blueprint
@@ -82,6 +86,55 @@ def create_password():
     return render_template('create-password.html')
 
 
+def generate_otp():
+    return random.randint(100000, 999999)  # 6-digit OTP
+
+@app.route('/two-step-verification', methods=['GET', 'POST'])
+def twoFactorAuthentication():
+    username = session.get('username')
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+    if not username or not user:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        entered_otp = request.form.get('code')
+        stored_otp = session.get('otp')
+        otp_expiry = session.get('otp_expiry')
+
+        # Check if the OTP is still valid
+        # if datetime.now() > otp_expiry:
+        #     flash('OTP has expired. Please request a new one.')
+        #     return redirect(url_for('twoFactorAuthentication'))
+
+        # OTP SUCCESS:
+        if entered_otp == str(stored_otp):
+            session.pop('otp', None)
+            session.pop('otp_expiry', None)
+
+            flash('Two-factor authentication successful!')
+            user.wrong_login_tries = 0
+            db.session.commit()
+            login_user(user)
+            return redirect(url_for('index'))
+
+        else:
+            flash('Incorrect OTP. Please try again.')
+            return redirect(url_for('twoFactorAuthentication'))
+
+    else:
+        otp = generate_otp()
+        otp_expiry = datetime.now() + timedelta(minutes=2)  # OTP valid for 5 minutes
+
+        session['otp'] = otp
+        session['otp_expiry'] = otp_expiry
+
+        otpEmail(username, otp)
+
+        flash('An OTP has been sent to your email.')
+        return render_template('two-factor-auth.html')  # Render the OTP input form
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -107,10 +160,34 @@ def login():
 
         if password is not None:
             if check_password_hash(user.password, password):
-                login_user(user)
+                print('here')
+                response = request.form.get('g-recaptcha-response')
+                print('response here, ', response)
+                verify_response = requests.post(url=f'https://www.google.com/recaptcha/api/siteverify?secret=6LeSpToqAAAAAFzsOXazHma0WARwovmBlwv1Px6q&response={response}')
+                verify_response_json = verify_response.json()
+                print(verify_response_json)
+
+                # Now you can check the 'success' field
+                if not verify_response_json.get('success'):
+                    abort(401)
+
+                if not user.wrong_login_tries or user.wrong_login_tries < 3:
+                    user.wrong_login_tries = 0
+                    db.session.commit(user)
+                    login_user(user)
+                else:
+                    session['username'] = user.username
+                    session['user_id'] = user.id
+                    return redirect(url_for('twoFactorAuthentication'))
                 return redirect(url_for('index'))
             else:
                 flash('Incorrect Username or Password', 'danger')
+                if user.wrong_login_tries:
+                    user.wrong_login_tries += 1
+                else:
+                    user.wrong_login_tries = 1
+
+                db.session.commit()
                 return render_template('login.html', username=username)
         else:
             flash('Please Enter a valid Password', 'danger')
