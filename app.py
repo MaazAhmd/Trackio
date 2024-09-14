@@ -173,7 +173,7 @@ def login():
 
                 if not user.wrong_login_tries or user.wrong_login_tries < 3:
                     user.wrong_login_tries = 0
-                    db.session.commit(user)
+                    db.session.commit()
                     login_user(user)
                 else:
                     session['username'] = user.username
