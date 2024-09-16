@@ -36,8 +36,6 @@
         <!--begin::Filter menu-->
         <form action="{{ url_for('time_entries.view_time_entries') }}" class="d-flex flex-wrap gap-3 align-items-center my-8">
 
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
             <div>
                 <label for="filter_clients">Filter by Client:</label>
                 <select class="form-select form-select-solid" id="filter_clients" name="filter_clients"
@@ -117,8 +115,6 @@
         <div class="d-flex flex-wrap gap-3 align-items-center">
             <form action="{{ url_for('time_entries.view_time_entries') }}" class="d-flex align-items-center mb-5">
 
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
                 <!-- Filter by Time -->
                 <div>
                     <label for="filter_time">Showing Entries For:</label>
@@ -164,7 +160,6 @@
             </form>
             <form action="{{ url_for('time_entries.view_time_entries') }}" class="d-flex flex-wrap gap-3 align-items-center mt-5 mb-10">
                 <!-- Filter by Time -->
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <input type="hidden" name="filter_time" value="custom">
                 <div>

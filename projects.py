@@ -254,7 +254,7 @@ def activate():
     db.session.add(project)
     db.session.commit()
     flash('Project activated.', 'success')
-    return redirect(url_for('projects.manage_projects'))
+    return redirect(url_for('projects.manage_projects', status='Archived'))
 
 
 @projects_blueprint.route('/archive', methods=['POST'])
@@ -274,7 +274,7 @@ def archive():
     db.session.add(project)
     db.session.commit()
     flash('Project archived.', 'success')
-    return redirect(url_for('projects.manage_projects', status='Archived'))
+    return redirect(url_for('projects.manage_projects'))
 
 
 

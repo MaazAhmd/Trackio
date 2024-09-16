@@ -208,6 +208,7 @@
                                         <td colspan="4">
                                             <form action="{{ url_for('time_tracking.create_time_entry') }}"
                                                   method="post">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                 <input type="hidden" name="project_id"
                                                        value="{{ project['project'].id }}">
                                                 <input type="hidden" name="tracking_date" value="{{ tracking_date }}">

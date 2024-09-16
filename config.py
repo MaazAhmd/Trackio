@@ -11,6 +11,7 @@ postgres_database = os.getenv('POSTGRES_DATABASE')
 
 class Config:
     SQLALCHEMY_DATABASE_URI = f'postgresql://{postgres_username}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_database}'
+    # SQLALCHEMY_DATABASE_URI = f'postgresql://postgres.yttudnkgkuqxawfrbedb:Postgres!123@aws-0-ap-south-1.pooler.supabase.com:6543/postgres'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'my_secretest_key_you_cant_guess_123'
 

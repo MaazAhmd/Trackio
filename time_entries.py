@@ -215,12 +215,13 @@ def view_time_entries():
 
         if project.price:
             if project.id not in projects_calculated:
-                currency = client.currency.upper()
-                if currency in total_billable_amount:
-                    total_billable_amount[currency] += project.price
-                else:
-                    total_billable_amount[currency] = project.price
-                projects_calculated.append(project.id)
+                if project.end_date > start_date and project.end_date < end_date:
+                    currency = client.currency.upper()
+                    if currency in total_billable_amount:
+                        total_billable_amount[currency] += project.price
+                    else:
+                        total_billable_amount[currency] = project.price
+                    projects_calculated.append(project.id)
 
     total_billable_duration_hours = total_billable_duration // 60
     total_billable_duration_mins = total_billable_duration % 60
