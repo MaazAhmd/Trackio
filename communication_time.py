@@ -23,8 +23,11 @@ def manage_communication_times(id=None):
         else:
             try:
                 tracking_datetime = datetime.strptime(query_date, '%Y-%m-%d %H:%M:%S.%f')
-            except ValueError:
-                tracking_datetime = datetime.strptime(query_date, '%Y-%m-%d')
+            except ValueError as e:
+                try:
+                    tracking_datetime = datetime.strptime(query_date, '%Y-%m-%d')
+                except ValueError as e:
+                    tracking_datetime = datetime.strptime(query_date, '%Y-%m-%d %H:%M:%S')
 
     if tracking_datetime.date() == datetime.now().date():
         today = True
